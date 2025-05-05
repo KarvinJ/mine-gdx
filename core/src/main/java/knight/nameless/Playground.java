@@ -34,6 +34,7 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
         image = new Texture("libgdx.png");
+
     }
 
     @Override

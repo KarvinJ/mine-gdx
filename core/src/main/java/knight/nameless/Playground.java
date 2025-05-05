@@ -72,7 +72,7 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         shapeRenderer.setColor(0, 0, 1, 1);
-        shapeRenderer.circle(circleX, circleY, 25);
+        shapeRenderer.circle(circleX, circleY, 30);
 
         shapeRenderer.end();
     }

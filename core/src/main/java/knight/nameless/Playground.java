@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class Playground extends ApplicationAdapter {
+
     public final int screenWidth = 420;
     public final int screenHeight = 640;
     private SpriteBatch batch;
@@ -27,6 +29,7 @@ public class Playground extends ApplicationAdapter {
     private final int CELL_OFFSET = 2;
     private int[][] gameGrid;
     private Array<Integer> selectedCellsIndex;
+    private Array<Integer> mineCellsIndex;
     float circleX = 200;
     float circleY = 100;
 
@@ -46,6 +49,28 @@ public class Playground extends ApplicationAdapter {
         initializeGrid(gameGrid);
 
         selectedCellsIndex = new Array<>();
+
+        mineCellsIndex = new Array<>();
+
+        initializeMines(mineCellsIndex);
+    }
+
+    private void initializeMines(Array<Integer> mineCells) {
+
+        for (int i = 0; i < 10; i++) {
+
+            int mineCellIndex = MathUtils.random(0, 81);
+
+            var isAlreadyAdded = mineCells.contains(mineCellIndex, true);
+
+            if (!isAlreadyAdded)
+                mineCells.add(mineCellIndex);
+            else {
+
+                mineCellIndex = MathUtils.random(0, 81);
+                mineCells.add(mineCellIndex);
+            }
+        }
     }
 
     private void initializeGrid(int[][] grid) {
@@ -107,7 +132,6 @@ public class Playground extends ApplicationAdapter {
 //
 //        batch.end();
 
-
         Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
 
         circleX = worldCoordinates.x;
@@ -135,19 +159,19 @@ public class Playground extends ApplicationAdapter {
 
                 var actualIndex = gameGrid[row][column];
 
-                for (var actual : selectedCellsIndex) {
+                if (selectedCellsIndex.contains(actualIndex, true)) {
 
-                    if (actual == actualIndex) {
+                    shapeRenderer.setColor(Color.DARK_GRAY);
+                    shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
 
-                        shapeRenderer.setColor(Color.DARK_GRAY);
+                    if (mineCellsIndex.contains(actualIndex, true)) {
+
+                        shapeRenderer.setColor(Color.RED);
                         shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
                     }
                 }
             }
         }
-
-//        shapeRenderer.setColor(0, 0, 1, 1);
-//        shapeRenderer.circle(circleX, circleY, 10);
 
         shapeRenderer.end();
     }

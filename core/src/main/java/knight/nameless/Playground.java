@@ -30,6 +30,7 @@ public class Playground extends ApplicationAdapter {
     private int[][] gameGrid;
     private Array<Integer> selectedCellsIndex;
     private Array<Integer> mineCellsIndex;
+    private Array<Integer> adjacentToMinesCellsIndex;
     float circleX = 200;
     float circleY = 100;
 
@@ -53,6 +54,20 @@ public class Playground extends ApplicationAdapter {
         mineCellsIndex = new Array<>();
 
         initializeMines(mineCellsIndex);
+
+        adjacentToMinesCellsIndex = new Array<>();
+
+        for (var mineCell : mineCellsIndex) {
+
+            var rightValue = mineCell + 1;
+            var leftValue = mineCell - 1;
+//            var topValue = mineCell - 9;
+//            var bottomValue = mineCell + 9;
+            adjacentToMinesCellsIndex.add(rightValue);
+            adjacentToMinesCellsIndex.add(leftValue);
+//            adjacentToMinesCellsIndex.add(topValue);
+//            adjacentToMinesCellsIndex.add(bottomValue);
+        }
     }
 
     private void initializeMines(Array<Integer> mineCells) {
@@ -167,6 +182,12 @@ public class Playground extends ApplicationAdapter {
                     if (mineCellsIndex.contains(actualIndex, true)) {
 
                         shapeRenderer.setColor(Color.RED);
+                        shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
+                    }
+
+                    if (adjacentToMinesCellsIndex.contains(actualIndex, true)) {
+
+                        shapeRenderer.setColor(Color.BLUE);
                         shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
                     }
                 }

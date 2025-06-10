@@ -31,8 +31,6 @@ public class Playground extends ApplicationAdapter {
     private Array<Integer> selectedCellsIndex;
     private Array<Integer> mineCellsIndex;
     private Array<Integer> adjacentToMinesCellsIndex;
-    float circleX = 200;
-    float circleY = 100;
 
     @Override
     public void create() {
@@ -57,33 +55,33 @@ public class Playground extends ApplicationAdapter {
 
         adjacentToMinesCellsIndex = new Array<>();
 
-        for (var mineCell : mineCellsIndex) {
-
-            var rightValue = mineCell + 1;
-            var leftValue = mineCell - 1;
-//            var topValue = mineCell - 9;
-//            var bottomValue = mineCell + 9;
-            adjacentToMinesCellsIndex.add(rightValue);
-            adjacentToMinesCellsIndex.add(leftValue);
-//            adjacentToMinesCellsIndex.add(topValue);
-//            adjacentToMinesCellsIndex.add(bottomValue);
-        }
+//        for (var mineCell : mineCellsIndex) {
+//
+//            var rightValue = mineCell + 1;
+//            var leftValue = mineCell - 1;
+////            var topValue = mineCell - 9;
+////            var bottomValue = mineCell + 9;
+//            adjacentToMinesCellsIndex.add(rightValue);
+//            adjacentToMinesCellsIndex.add(leftValue);
+////            adjacentToMinesCellsIndex.add(topValue);
+////            adjacentToMinesCellsIndex.add(bottomValue);
+//        }
     }
 
     private void initializeMines(Array<Integer> mineCells) {
 
         for (int i = 0; i < 10; i++) {
 
-            int mineCellIndex = MathUtils.random(0, 81);
+            var isAlreadyAdded = true;
 
-            var isAlreadyAdded = mineCells.contains(mineCellIndex, true);
+            while (isAlreadyAdded) {
 
-            if (!isAlreadyAdded)
-                mineCells.add(mineCellIndex);
-            else {
+                int mineCellIndex = MathUtils.random(0, 81);
 
-                mineCellIndex = MathUtils.random(0, 81);
-                mineCells.add(mineCellIndex);
+                isAlreadyAdded = mineCells.contains(mineCellIndex, true);
+
+                if (!isAlreadyAdded)
+                    mineCells.add(mineCellIndex);
             }
         }
     }
@@ -147,17 +145,8 @@ public class Playground extends ApplicationAdapter {
 //
 //        batch.end();
 
-        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-
-        circleX = worldCoordinates.x;
-        circleY = worldCoordinates.y;
-
-
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-//        shapeRenderer.setColor(Color.LIGHT_GRAY);
-//        shapeRenderer.rect(0, 0, 200, 200);
 
         drawGrid(shapeRenderer);
 

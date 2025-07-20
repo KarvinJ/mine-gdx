@@ -260,42 +260,30 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
-//        for (int row = 0; row < TOTAL_ROWS; row++) {
-//
-//            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-//
-//            }
-//        }
+        for (int row = selectedRow; row < TOTAL_ROWS; row++) {
 
-        var previousColumn = selectedColumn - 1;
-        var nextColumn = selectedColumn + 1;
+            var previousRow = row - 1;
 
-        var previousRow = selectedRow - 1;
-        var nextRow = selectedRow + 1;
+            if (previousRow >= 0 && gameGrid[row - 1][selectedColumn].mineCounter > 0) {
+                break;
+            }
 
-        if (nextColumn < TOTAL_COLUMNS && !gameGrid[selectedRow][nextColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[selectedRow][nextColumn].index);
+            for (int column = selectedColumn; column < TOTAL_COLUMNS; column++) {
 
-        if (previousColumn >= 0 && !gameGrid[selectedRow][previousColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[selectedRow][previousColumn].index);
+                var actualCell = gameGrid[row][column];
 
-        if (previousRow >= 0 && !gameGrid[previousRow][selectedColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[previousRow][selectedColumn].index);
+                if (actualCell.isMined)
+                    break;
 
-        if (nextRow < TOTAL_ROWS && !gameGrid[nextRow][selectedColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[nextRow][selectedColumn].index);
+                if (actualCell.mineCounter > 0) {
 
-        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && !gameGrid[nextRow][nextColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[nextRow][nextColumn].index);
-
-        if (nextRow < TOTAL_ROWS && previousColumn >= 0 && !gameGrid[nextRow][previousColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[nextRow][previousColumn].index);
-
-        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && !gameGrid[previousRow][nextColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[previousRow][nextColumn].index);
-
-        if (previousRow >= 0 && previousColumn >= 0 && !gameGrid[previousRow][previousColumn].isMined)
-            selectedCellsIndexes.add(gameGrid[previousRow][previousColumn].index);
+                    selectedCellsIndexes.add(actualCell.index);
+                    break;
+                }
+                else
+                    selectedCellsIndexes.add(gameGrid[row][column].index);
+            }
+        }
     }
 
     @Override

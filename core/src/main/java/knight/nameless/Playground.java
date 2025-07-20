@@ -260,34 +260,41 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
+//        for (int row = 0; row < TOTAL_ROWS; row++) {
+//
+//            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+//
+//            }
+//        }
+
         var previousColumn = selectedColumn - 1;
         var nextColumn = selectedColumn + 1;
 
         var previousRow = selectedRow - 1;
         var nextRow = selectedRow + 1;
 
-        if (nextColumn < TOTAL_COLUMNS && !gameGrid[selectedRow][nextColumn].isMined && gameGrid[selectedRow][nextColumn].mineCounter == 0)
+        if (nextColumn < TOTAL_COLUMNS && !gameGrid[selectedRow][nextColumn].isMined)
             selectedCellsIndexes.add(gameGrid[selectedRow][nextColumn].index);
 
-        if (previousColumn >= 0 && !gameGrid[selectedRow][previousColumn].isMined && gameGrid[selectedRow][previousColumn].mineCounter == 0)
+        if (previousColumn >= 0 && !gameGrid[selectedRow][previousColumn].isMined)
             selectedCellsIndexes.add(gameGrid[selectedRow][previousColumn].index);
 
-        if (previousRow >= 0 && !gameGrid[previousRow][selectedColumn].isMined && gameGrid[previousRow][selectedColumn].mineCounter == 0)
+        if (previousRow >= 0 && !gameGrid[previousRow][selectedColumn].isMined)
             selectedCellsIndexes.add(gameGrid[previousRow][selectedColumn].index);
 
-        if (nextRow < TOTAL_ROWS && !gameGrid[nextRow][selectedColumn].isMined && gameGrid[nextRow][selectedColumn].mineCounter == 0)
+        if (nextRow < TOTAL_ROWS && !gameGrid[nextRow][selectedColumn].isMined)
             selectedCellsIndexes.add(gameGrid[nextRow][selectedColumn].index);
 
-        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && !gameGrid[nextRow][nextColumn].isMined && gameGrid[nextRow][nextColumn].mineCounter == 0)
+        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && !gameGrid[nextRow][nextColumn].isMined)
             selectedCellsIndexes.add(gameGrid[nextRow][nextColumn].index);
 
-        if (nextRow < TOTAL_ROWS && previousColumn >= 0 && !gameGrid[nextRow][previousColumn].isMined && gameGrid[nextRow][previousColumn].mineCounter == 0)
+        if (nextRow < TOTAL_ROWS && previousColumn >= 0 && !gameGrid[nextRow][previousColumn].isMined)
             selectedCellsIndexes.add(gameGrid[nextRow][previousColumn].index);
 
-        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && !gameGrid[previousRow][nextColumn].isMined && gameGrid[previousRow][nextColumn].mineCounter == 0)
+        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && !gameGrid[previousRow][nextColumn].isMined)
             selectedCellsIndexes.add(gameGrid[previousRow][nextColumn].index);
 
-        if (previousRow >= 0 && previousColumn >= 0 && !gameGrid[previousRow][previousColumn].isMined && gameGrid[previousRow][previousColumn].mineCounter == 0)
+        if (previousRow >= 0 && previousColumn >= 0 && !gameGrid[previousRow][previousColumn].isMined)
             selectedCellsIndexes.add(gameGrid[previousRow][previousColumn].index);
     }
 

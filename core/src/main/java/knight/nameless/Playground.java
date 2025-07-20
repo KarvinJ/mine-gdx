@@ -27,7 +27,7 @@ public class Playground extends ApplicationAdapter {
     private final int CELL_SIZE = 45;
     private final int VERTICAL_OFFSET = 100;
     private final int CELL_OFFSET = 2;
-    private int[][] gameGrid;
+    private Cell[][] gameGrid;
     private Array<Integer> selectedCellsIndexes;
     private Array<Integer> mineCellsIndex;
     private Array<Integer> adjacentToMinesCellsIndex;
@@ -43,7 +43,7 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
 
-        gameGrid = new int[TOTAL_ROWS][TOTAL_COLUMNS];
+        gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
 
         initializeGrid(gameGrid);
 
@@ -52,21 +52,9 @@ public class Playground extends ApplicationAdapter {
         mineCellsIndex = new Array<>();
 
         adjacentToMinesCellsIndex = new Array<>();
-
-//        for (var mineCell : mineCellsIndex) {
-//
-//            var rightValue = mineCell + 1;
-//            var leftValue = mineCell - 1;
-////            var topValue = mineCell - 9;
-////            var bottomValue = mineCell + 9;
-//            adjacentToMinesCellsIndex.add(rightValue);
-//            adjacentToMinesCellsIndex.add(leftValue);
-////            adjacentToMinesCellsIndex.add(topValue);
-////            adjacentToMinesCellsIndex.add(bottomValue);
-//        }
     }
 
-    private void initializeMines(Array<Integer> mineCells, int firstSelectedIndex) {
+    private void initializeMineField(Array<Integer> mineCells, int firstSelectedIndex) {
 
         for (int i = 0; i < 10; i++) {
 
@@ -90,7 +78,7 @@ public class Playground extends ApplicationAdapter {
         }
     }
 
-    private void initializeGrid(int[][] grid) {
+    private void initializeGrid(Cell[][] grid) {
 
         int index = 0;
 
@@ -98,7 +86,14 @@ public class Playground extends ApplicationAdapter {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
-                grid[row][column] = index;
+                Rectangle actualCellBounds = new Rectangle(
+                    column * CELL_SIZE + HORIZONTAL_OFFSET,
+                    row * CELL_SIZE + VERTICAL_OFFSET,
+                    CELL_SIZE - CELL_OFFSET,
+                    CELL_SIZE - CELL_OFFSET
+                );
+
+                grid[row][column] = new Cell(index, actualCellBounds);
                 index++;
             }
         }
@@ -108,39 +103,6 @@ public class Playground extends ApplicationAdapter {
     public void resize(int width, int height) {
         viewport.update(width, height);
     }
-
-    private void drawGrid(ShapeRenderer shapeRenderer) {
-
-        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-
-        var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                Rectangle actualCell = new Rectangle(
-                    column * CELL_SIZE + HORIZONTAL_OFFSET,
-                    row * CELL_SIZE + VERTICAL_OFFSET,
-                    CELL_SIZE - CELL_OFFSET,
-                    CELL_SIZE - CELL_OFFSET
-                );
-
-                if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell)) {
-
-                    int selectedIndex = gameGrid[row][column];
-                    selectedCellsIndexes.add(selectedIndex);
-
-                    if(selectedCellsIndexes.size == 1)
-                        initializeMines(mineCellsIndex, selectedIndex);
-                }
-
-                shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
-                shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
-            }
-        }
-    }
-
 
     @Override
     public void render() {
@@ -155,37 +117,54 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        drawGrid(shapeRenderer);
+        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+
+        var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
-                Rectangle actualCell = new Rectangle(
-                    column * CELL_SIZE + HORIZONTAL_OFFSET,
-                    row * CELL_SIZE + VERTICAL_OFFSET,
-                    CELL_SIZE - CELL_OFFSET,
-                    CELL_SIZE - CELL_OFFSET
+                var actualCell = gameGrid[row][column];
+
+                if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell.bounds)) {
+
+                    int selectedIndex = actualCell.index;
+                    selectedCellsIndexes.add(actualCell.index);
+
+                    if(selectedCellsIndexes.size == 1)
+                        initializeMineField(mineCellsIndex, selectedIndex);
+                }
+
+                shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
+
+                shapeRenderer.rect(
+                    actualCell.bounds.x,
+                    actualCell.bounds.y,
+                    actualCell.bounds.width,
+                    actualCell.bounds.height
                 );
 
-                var actualIndex = gameGrid[row][column];
-
-                if (selectedCellsIndexes.contains(actualIndex, true)) {
+                if (selectedCellsIndexes.contains(actualCell.index, true)) {
 
                     shapeRenderer.setColor(Color.DARK_GRAY);
-                    shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
 
-                    if (mineCellsIndex.contains(actualIndex, true)) {
+                    if (mineCellsIndex.contains(actualCell.index, true)) {
 
                         shapeRenderer.setColor(Color.RED);
-                        shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
                     }
 
-                    if (adjacentToMinesCellsIndex.contains(actualIndex, true)) {
+                    if (adjacentToMinesCellsIndex.contains(actualCell.index, true)) {
 
                         shapeRenderer.setColor(Color.BLUE);
-                        shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);
                     }
+
+                    shapeRenderer.rect(
+                        actualCell.bounds.x,
+                        actualCell.bounds.y,
+                        actualCell.bounds.width,
+                        actualCell.bounds.height
+                    );
                 }
             }
         }

@@ -23,13 +23,8 @@ public class Playground extends ApplicationAdapter {
     public OrthographicCamera camera;
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
-    private final int HORIZONTAL_OFFSET = 7;
-    private final int CELL_SIZE = 45;
-    private final int VERTICAL_OFFSET = 100;
-    private final int CELL_OFFSET = 2;
     private Cell[][] gameGrid;
     private Array<Integer> selectedCellsIndexes;
-    private Array<Cell> mineCells;
     private Array<Integer> adjacentToMinesCellsIndexes;
 
     @Override
@@ -48,16 +43,14 @@ public class Playground extends ApplicationAdapter {
         initializeGrid(gameGrid);
 
         selectedCellsIndexes = new Array<>();
-
         adjacentToMinesCellsIndexes = new Array<>();
-        mineCells = new Array<>();
     }
 
     private void initializeMineField(int firstSelectedIndex) {
 
         Array<Integer> mineCellsIndexes = new Array<>();
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
 
             var isAlreadyAdded = true;
 
@@ -84,7 +77,6 @@ public class Playground extends ApplicationAdapter {
                             if (actualCell.index == mineCellIndex) {
 
                                 actualCell.isMined = true;
-                                mineCells.add(actualCell);
                                 break;
                             }
                         }
@@ -113,37 +105,29 @@ public class Playground extends ApplicationAdapter {
                 var previousRow = row - 1;
                 var nextRow = row + 1;
 
-                if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].isMined) {
+                if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (previousColumn >= 0 && gameGrid[row][previousColumn].isMined) {
+                else if (previousColumn >= 0 && gameGrid[row][previousColumn].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (previousRow >= 0 && gameGrid[previousRow][column].isMined) {
+                else if (previousRow >= 0 && gameGrid[previousRow][column].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (nextRow < TOTAL_ROWS && gameGrid[nextRow][column].isMined) {
+                else if (nextRow < TOTAL_ROWS && gameGrid[nextRow][column].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].isMined) {
+                else if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (nextRow< TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].isMined) {
+                else if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (previousRow >= 0 && column + 1 < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined) {
+                else if (previousRow >= 0 && column + 1 < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
 
-                else if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].isMined) {
+                else if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].isMined)
                     adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
             }
         }
     }
@@ -152,15 +136,20 @@ public class Playground extends ApplicationAdapter {
 
         int index = 0;
 
+        int horizontalOffset = 7;
+        int cellSize = 45;
+        int verticalOffset = 100;
+        int cellOffset = 2;
+
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
                 Rectangle actualCellBounds = new Rectangle(
-                    column * CELL_SIZE + HORIZONTAL_OFFSET,
-                    row * CELL_SIZE + VERTICAL_OFFSET,
-                    CELL_SIZE - CELL_OFFSET,
-                    CELL_SIZE - CELL_OFFSET
+                    column * cellSize + horizontalOffset,
+                    row * cellSize + verticalOffset,
+                    cellSize - cellOffset,
+                    cellSize - cellOffset
                 );
 
                 grid[row][column] = new Cell(index, actualCellBounds);

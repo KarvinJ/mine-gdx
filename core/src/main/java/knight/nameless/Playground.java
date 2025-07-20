@@ -29,8 +29,8 @@ public class Playground extends ApplicationAdapter {
     private final int CELL_OFFSET = 2;
     private Cell[][] gameGrid;
     private Array<Integer> selectedCellsIndexes;
-    private Array<Integer> mineCellsIndex;
-    private Array<Integer> adjacentToMinesCellsIndex;
+    private Array<Cell> mineCells;
+    private Array<Integer> adjacentToMinesCellsIndexes;
 
     @Override
     public void create() {
@@ -49,14 +49,15 @@ public class Playground extends ApplicationAdapter {
 
         selectedCellsIndexes = new Array<>();
 
-        mineCellsIndex = new Array<>();
-
-        adjacentToMinesCellsIndex = new Array<>();
+        adjacentToMinesCellsIndexes = new Array<>();
+        mineCells = new Array<>();
     }
 
-    private void initializeMineField(Array<Integer> mineCells, int firstSelectedIndex) {
+    private void initializeMineField(int firstSelectedIndex) {
 
-        for (int i = 0; i < 10; i++) {
+        Array<Integer> mineCellsIndexes = new Array<>();
+
+        for (int i = 0; i < 5; i++) {
 
             var isAlreadyAdded = true;
 
@@ -64,7 +65,7 @@ public class Playground extends ApplicationAdapter {
 
                 int mineCellIndex = MathUtils.random(0, 81);
 
-                isAlreadyAdded = mineCells.contains(mineCellIndex, true);
+                isAlreadyAdded = mineCellsIndexes.contains(mineCellIndex, true);
 
                 if (!isAlreadyAdded) {
 
@@ -72,7 +73,77 @@ public class Playground extends ApplicationAdapter {
                     if (mineCellIndex == firstSelectedIndex)
                         mineCellIndex++;
 
-                    mineCells.add(mineCellIndex);
+                    mineCellsIndexes.add(mineCellIndex);
+
+                    for (int row = 0; row < TOTAL_ROWS; row++) {
+
+                        for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                            var actualCell = gameGrid[row][column];
+
+                            if (actualCell.index == mineCellIndex) {
+
+                                actualCell.isMined = true;
+                                mineCells.add(actualCell);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        checkForAdjacentMines();
+    }
+
+    private void checkForAdjacentMines() {
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (actualCell.isMined)
+                    continue;
+
+                var previousColumn = column - 1;
+                var nextColumn = column + 1;
+
+                var previousRow = row - 1;
+                var nextRow = row + 1;
+                
+
+                if (column + 1 < TOTAL_COLUMNS && gameGrid[row][column + 1].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (column - 1 >= 0 && gameGrid[row][column - 1].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (row - 1 >= 0 && gameGrid[row - 1][column].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (row + 1 < TOTAL_ROWS && gameGrid[row + 1][column].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (row + 1 < TOTAL_ROWS && column + 1 < TOTAL_COLUMNS && gameGrid[row + 1][column + 1].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (row + 1 < TOTAL_ROWS && column - 1 >= 0 && gameGrid[row + 1][column - 1].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (row - 1 >= 0 && column + 1 < TOTAL_COLUMNS && gameGrid[row - 1][column + 1].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
+
+                else if (row - 1 >= 0 && column - 1 >= 0 && gameGrid[row - 1][column - 1].isMined) {
+                    adjacentToMinesCellsIndexes.add(actualCell.index);
                 }
             }
         }
@@ -132,8 +203,8 @@ public class Playground extends ApplicationAdapter {
                     int selectedIndex = actualCell.index;
                     selectedCellsIndexes.add(actualCell.index);
 
-                    if(selectedCellsIndexes.size == 1)
-                        initializeMineField(mineCellsIndex, selectedIndex);
+                    if (selectedCellsIndexes.size == 1)
+                        initializeMineField(selectedIndex);
                 }
 
                 shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
@@ -149,12 +220,12 @@ public class Playground extends ApplicationAdapter {
 
                     shapeRenderer.setColor(Color.DARK_GRAY);
 
-                    if (mineCellsIndex.contains(actualCell.index, true)) {
+                    if (actualCell.isMined) {
 
                         shapeRenderer.setColor(Color.RED);
                     }
 
-                    if (adjacentToMinesCellsIndex.contains(actualCell.index, true)) {
+                    if (adjacentToMinesCellsIndexes.contains(actualCell.index, true)) {
 
                         shapeRenderer.setColor(Color.BLUE);
                     }

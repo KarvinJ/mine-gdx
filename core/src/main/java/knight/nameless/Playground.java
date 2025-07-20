@@ -264,7 +264,7 @@ public class Playground extends ApplicationAdapter {
 
             var previousRow = row - 1;
 
-            if (previousRow >= 0 && gameGrid[row - 1][selectedColumn].mineCounter > 0) {
+            if (previousRow >= 0 && gameGrid[previousRow][selectedColumn].isMined) {
                 break;
             }
 

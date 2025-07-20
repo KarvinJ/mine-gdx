@@ -50,13 +50,15 @@ public class Playground extends ApplicationAdapter {
 
         Array<Integer> mineCellsIndexes = new Array<>();
 
+        int gridMaxIndex = TOTAL_ROWS * TOTAL_COLUMNS;
+
         for (int i = 0; i < 10; i++) {
 
             var isAlreadyAdded = true;
 
             while (isAlreadyAdded) {
 
-                int mineCellIndex = MathUtils.random(0, 81);
+                int mineCellIndex = MathUtils.random(0, gridMaxIndex);
 
                 isAlreadyAdded = mineCellsIndexes.contains(mineCellIndex, true);
 
@@ -125,7 +127,7 @@ public class Playground extends ApplicationAdapter {
                 if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].isMined)
                     mineCounter++;
 
-                if (previousRow >= 0 && column + 1 < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined)
+                if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined)
                     mineCounter++;
 
                 if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].isMined)
@@ -201,6 +203,8 @@ public class Playground extends ApplicationAdapter {
 
                     if (selectedCellsIndexes.size == 1)
                         initializeMineField(selectedIndex);
+
+                    checkForCleanCells(actualCell, row, column);
                 }
 
                 shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
@@ -212,7 +216,7 @@ public class Playground extends ApplicationAdapter {
                     actualCell.bounds.height
                 );
 
-//                if (selectedCellsIndexes.contains(actualCell.index, true)) {
+                if (selectedCellsIndexes.contains(actualCell.index, true)) {
 
                     shapeRenderer.setColor(Color.DARK_GRAY);
 
@@ -227,10 +231,13 @@ public class Playground extends ApplicationAdapter {
 
                         if (actualCell.mineCounter == 1)
                             shapeRenderer.setColor(Color.BLUE);
+
                         else if (actualCell.mineCounter == 2)
                             shapeRenderer.setColor(Color.GREEN);
+
                         else if (actualCell.mineCounter == 3)
                             shapeRenderer.setColor(Color.GOLD);
+
                         else
                             shapeRenderer.setColor(Color.SCARLET);
                     }
@@ -241,11 +248,47 @@ public class Playground extends ApplicationAdapter {
                         actualCell.bounds.width,
                         actualCell.bounds.height
                     );
-//                }
+                }
             }
         }
 
         shapeRenderer.end();
+    }
+
+    private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
+
+        if (selectedCell.isMined || selectedCell.mineCounter > 0)
+            return;
+
+        var previousColumn = selectedColumn - 1;
+        var nextColumn = selectedColumn + 1;
+
+        var previousRow = selectedRow - 1;
+        var nextRow = selectedRow + 1;
+
+        if (nextColumn < TOTAL_COLUMNS && !gameGrid[selectedRow][nextColumn].isMined && gameGrid[selectedRow][nextColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[selectedRow][nextColumn].index);
+
+        if (previousColumn >= 0 && !gameGrid[selectedRow][previousColumn].isMined && gameGrid[selectedRow][previousColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[selectedRow][previousColumn].index);
+
+        if (previousRow >= 0 && !gameGrid[previousRow][selectedColumn].isMined && gameGrid[previousRow][selectedColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[previousRow][selectedColumn].index);
+
+        if (nextRow < TOTAL_ROWS && !gameGrid[nextRow][selectedColumn].isMined && gameGrid[nextRow][selectedColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[nextRow][selectedColumn].index);
+
+        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && !gameGrid[nextRow][nextColumn].isMined && gameGrid[nextRow][nextColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[nextRow][nextColumn].index);
+
+        if (nextRow < TOTAL_ROWS && previousColumn >= 0 && !gameGrid[nextRow][previousColumn].isMined && gameGrid[nextRow][previousColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[nextRow][previousColumn].index);
+
+        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && !gameGrid[previousRow][nextColumn].isMined && gameGrid[previousRow][nextColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[previousRow][nextColumn].index);
+
+        if (previousRow >= 0 && previousColumn >= 0 && !gameGrid[previousRow][previousColumn].isMined && gameGrid[previousRow][previousColumn].mineCounter == 0)
+            selectedCellsIndexes.add(gameGrid[previousRow][previousColumn].index);
     }
 
     @Override

@@ -105,29 +105,37 @@ public class Playground extends ApplicationAdapter {
                 var previousRow = row - 1;
                 var nextRow = row + 1;
 
+                int mineCounter = 0;
+
                 if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                    mineCounter++;
 
-                else if (previousColumn >= 0 && gameGrid[row][previousColumn].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                if (previousColumn >= 0 && gameGrid[row][previousColumn].isMined)
+                    mineCounter++;
 
-                else if (previousRow >= 0 && gameGrid[previousRow][column].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                if (previousRow >= 0 && gameGrid[previousRow][column].isMined)
+                    mineCounter++;
 
-                else if (nextRow < TOTAL_ROWS && gameGrid[nextRow][column].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                if (nextRow < TOTAL_ROWS && gameGrid[nextRow][column].isMined)
+                    mineCounter++;
 
-                else if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].isMined)
+                    mineCounter++;
 
-                else if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].isMined)
+                    mineCounter++;
 
-                else if (previousRow >= 0 && column + 1 < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined)
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
+                if (previousRow >= 0 && column + 1 < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined)
+                    mineCounter++;
 
-                else if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].isMined)
+                if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].isMined)
+                    mineCounter++;
+
+                if (mineCounter > 0) {
+
+                    actualCell.mineCounter = mineCounter;
                     adjacentToMinesCellsIndexes.add(actualCell.index);
+                }
             }
         }
     }
@@ -204,18 +212,27 @@ public class Playground extends ApplicationAdapter {
                     actualCell.bounds.height
                 );
 
-                if (selectedCellsIndexes.contains(actualCell.index, true)) {
+//                if (selectedCellsIndexes.contains(actualCell.index, true)) {
 
                     shapeRenderer.setColor(Color.DARK_GRAY);
 
                     if (actualCell.isMined) {
 
                         shapeRenderer.setColor(Color.RED);
+
+//                        create();
                     }
 
                     if (adjacentToMinesCellsIndexes.contains(actualCell.index, true)) {
 
-                        shapeRenderer.setColor(Color.BLUE);
+                        if (actualCell.mineCounter == 1)
+                            shapeRenderer.setColor(Color.BLUE);
+                        else if (actualCell.mineCounter == 2)
+                            shapeRenderer.setColor(Color.GREEN);
+                        else if (actualCell.mineCounter == 3)
+                            shapeRenderer.setColor(Color.GOLD);
+                        else
+                            shapeRenderer.setColor(Color.SCARLET);
                     }
 
                     shapeRenderer.rect(
@@ -224,7 +241,7 @@ public class Playground extends ApplicationAdapter {
                         actualCell.bounds.width,
                         actualCell.bounds.height
                     );
-                }
+//                }
             }
         }
 

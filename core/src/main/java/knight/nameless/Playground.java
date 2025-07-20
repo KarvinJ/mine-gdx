@@ -28,7 +28,7 @@ public class Playground extends ApplicationAdapter {
     private final int VERTICAL_OFFSET = 100;
     private final int CELL_OFFSET = 2;
     private int[][] gameGrid;
-    private Array<Integer> selectedCellsIndex;
+    private Array<Integer> selectedCellsIndexes;
     private Array<Integer> mineCellsIndex;
     private Array<Integer> adjacentToMinesCellsIndex;
 
@@ -47,11 +47,9 @@ public class Playground extends ApplicationAdapter {
 
         initializeGrid(gameGrid);
 
-        selectedCellsIndex = new Array<>();
+        selectedCellsIndexes = new Array<>();
 
         mineCellsIndex = new Array<>();
-
-        initializeMines(mineCellsIndex);
 
         adjacentToMinesCellsIndex = new Array<>();
 
@@ -68,7 +66,7 @@ public class Playground extends ApplicationAdapter {
 //        }
     }
 
-    private void initializeMines(Array<Integer> mineCells) {
+    private void initializeMines(Array<Integer> mineCells, int firstSelectedIndex) {
 
         for (int i = 0; i < 10; i++) {
 
@@ -80,8 +78,14 @@ public class Playground extends ApplicationAdapter {
 
                 isAlreadyAdded = mineCells.contains(mineCellIndex, true);
 
-                if (!isAlreadyAdded)
+                if (!isAlreadyAdded) {
+
+                    //the mine cannot be in the first index selected by the player.
+                    if (mineCellIndex == firstSelectedIndex)
+                        mineCellIndex++;
+
                     mineCells.add(mineCellIndex);
+                }
             }
         }
     }
@@ -125,7 +129,10 @@ public class Playground extends ApplicationAdapter {
                 if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell)) {
 
                     int selectedIndex = gameGrid[row][column];
-                    selectedCellsIndex.add(selectedIndex);
+                    selectedCellsIndexes.add(selectedIndex);
+
+                    if(selectedCellsIndexes.size == 1)
+                        initializeMines(mineCellsIndex, selectedIndex);
                 }
 
                 shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
@@ -163,7 +170,7 @@ public class Playground extends ApplicationAdapter {
 
                 var actualIndex = gameGrid[row][column];
 
-                if (selectedCellsIndex.contains(actualIndex, true)) {
+                if (selectedCellsIndexes.contains(actualIndex, true)) {
 
                     shapeRenderer.setColor(Color.DARK_GRAY);
                     shapeRenderer.rect(actualCell.x, actualCell.y, actualCell.width, actualCell.height);

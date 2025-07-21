@@ -2,6 +2,7 @@ package knight.nameless;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -177,6 +178,9 @@ public class Playground extends ApplicationAdapter {
     @Override
     public void render() {
 
+        if (Gdx.input.isKeyPressed(Input.Keys.R))
+            resetGame();
+
         ScreenUtils.clear(Color.BLACK);
 
 //        batch.setProjectionMatrix(viewport.getCamera().combined);
@@ -228,7 +232,7 @@ public class Playground extends ApplicationAdapter {
 
                         shapeRenderer.setColor(Color.RED);
 
-//                        create();
+//                        resetGame();
                     }
 
                     if (adjacentToMinesCellsIndexes.contains(actualCell.index, true)) {
@@ -257,6 +261,22 @@ public class Playground extends ApplicationAdapter {
         }
 
         shapeRenderer.end();
+    }
+
+    private void resetGame() {
+
+        selectedCellsIndexes.clear();
+        mineCellsIndexes.clear();
+        adjacentToMinesCellsIndexes.clear();
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                gameGrid[row][column].isMined = false;
+                gameGrid[row][column].mineCounter = 0;
+            }
+        }
     }
 
     private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {

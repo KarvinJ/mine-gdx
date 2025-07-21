@@ -26,6 +26,7 @@ public class Playground extends ApplicationAdapter {
     private Cell[][] gameGrid;
     private Array<Integer> selectedCellsIndexes;
     private Array<Integer> adjacentToMinesCellsIndexes;
+    private Array<Integer> mineCellsIndexes;
 
     @Override
     public void create() {
@@ -44,11 +45,11 @@ public class Playground extends ApplicationAdapter {
 
         selectedCellsIndexes = new Array<>();
         adjacentToMinesCellsIndexes = new Array<>();
+
+        mineCellsIndexes = new Array<>();
     }
 
     private void initializeMineField(int firstSelectedIndex) {
-
-        Array<Integer> mineCellsIndexes = new Array<>();
 
         int gridMaxIndex = TOTAL_ROWS * TOTAL_COLUMNS;
 
@@ -200,15 +201,14 @@ public class Playground extends ApplicationAdapter {
 
                     int selectedIndex = actualCell.index;
 
-                    if (!selectedCellsIndexes.contains(actualCell.index, true))
-                        selectedCellsIndexes.add(actualCell.index);
-
-                    if (selectedCellsIndexes.size == 1)
+                    if (mineCellsIndexes.size == 0)
                         initializeMineField(selectedIndex);
 
-                    checkForCleanCells(actualCell, row, column);
+                    if (!selectedCellsIndexes.contains(actualCell.index, true)) {
 
-                    var test = selectedCellsIndexes;
+                        selectedCellsIndexes.add(actualCell.index);
+                        checkForCleanCells(actualCell, row, column);
+                    }
                 }
 
                 shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);

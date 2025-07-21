@@ -275,13 +275,7 @@ public class Playground extends ApplicationAdapter {
                 if (actualCell.isMined)
                     break;
 
-                if (actualCell.mineCounter > 0) {
-
-                    selectedCellsIndexes.add(actualCell.index);
-                    break;
-                }
-                else
-                    selectedCellsIndexes.add(gameGrid[row][column].index);
+                selectedCellsIndexes.add(gameGrid[row][column].index);
             }
         }
     }

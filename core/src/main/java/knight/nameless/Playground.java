@@ -199,12 +199,16 @@ public class Playground extends ApplicationAdapter {
                 if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell.bounds)) {
 
                     int selectedIndex = actualCell.index;
-                    selectedCellsIndexes.add(actualCell.index);
+
+                    if (!selectedCellsIndexes.contains(actualCell.index, true))
+                        selectedCellsIndexes.add(actualCell.index);
 
                     if (selectedCellsIndexes.size == 1)
                         initializeMineField(selectedIndex);
 
                     checkForCleanCells(actualCell, row, column);
+
+                    var test = selectedCellsIndexes;
                 }
 
                 shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
@@ -260,13 +264,31 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
+        for (int row = selectedRow; row >= 0; row--) {
+
+            var previousRow = row + 1;
+
+            if (previousRow < TOTAL_ROWS && gameGrid[previousRow][selectedColumn].isMined)
+                break;
+
+            for (int column = selectedColumn; column >= 0; column--) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (actualCell.isMined)
+                    break;
+
+                if (!selectedCellsIndexes.contains(actualCell.index, true))
+                    selectedCellsIndexes.add(gameGrid[row][column].index);
+            }
+        }
+
         for (int row = selectedRow; row < TOTAL_ROWS; row++) {
 
             var previousRow = row - 1;
 
-            if (previousRow >= 0 && gameGrid[previousRow][selectedColumn].isMined) {
+            if (previousRow >= 0 && gameGrid[previousRow][selectedColumn].isMined)
                 break;
-            }
 
             for (int column = selectedColumn; column < TOTAL_COLUMNS; column++) {
 
@@ -275,7 +297,8 @@ public class Playground extends ApplicationAdapter {
                 if (actualCell.isMined)
                     break;
 
-                selectedCellsIndexes.add(gameGrid[row][column].index);
+                if (!selectedCellsIndexes.contains(actualCell.index, true))
+                    selectedCellsIndexes.add(gameGrid[row][column].index);
             }
         }
     }

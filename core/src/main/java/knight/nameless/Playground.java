@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,9 +18,10 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class Playground extends ApplicationAdapter {
 
-    public final int screenWidth = 420;
-    public final int screenHeight = 640;
+    public final int SCREEN_WIDTH = 420;
+    public final int SCREEN_HEIGHT = 640;
     private SpriteBatch batch;
+    private BitmapFont font;
     private ShapeRenderer shapeRenderer;
     public ExtendViewport viewport;
     public OrthographicCamera camera;
@@ -33,17 +35,19 @@ public class Playground extends ApplicationAdapter {
     private Texture mineTexture;
     private Texture flagTexture;
     private Array<Texture> tileNumberTextures;
+    private float time = 0;
 
     @Override
     public void create() {
 
         camera = new OrthographicCamera();
-        camera.position.set(screenWidth / 2f, screenHeight / 2f, 0);
+        camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
 
-        viewport = new ExtendViewport(screenWidth, screenHeight, camera);
+        viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
+        font = new BitmapFont();
 
         gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
 
@@ -301,6 +305,8 @@ public class Playground extends ApplicationAdapter {
 
         shapeRenderer.end();
 
+        var flaggedCells = getFlaggedCells();
+
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
@@ -322,7 +328,7 @@ public class Playground extends ApplicationAdapter {
                         actualCell.draw(batch);
                 }
 
-                for (var flaggedCell : getFlaggedCells()) {
+                for (var flaggedCell : flaggedCells) {
 
                     batch.draw(
                         flagTexture,
@@ -335,6 +341,14 @@ public class Playground extends ApplicationAdapter {
             }
         }
 
+        int totalFlags = TOTAL_MINES - flaggedCells.size;
+        font.draw(batch, String.valueOf(totalFlags), 60, SCREEN_HEIGHT - 20);
+
+        if (!mineCellsIndexes.isEmpty())
+            time += Gdx.graphics.getDeltaTime();
+
+        font.draw(batch, String.valueOf((int)time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
+
         batch.end();
     }
 
@@ -343,6 +357,7 @@ public class Playground extends ApplicationAdapter {
         selectedCellsIndexes.clear();
         mineCellsIndexes.clear();
         adjacentToMinesCellsIndexes.clear();
+        time = 0;
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 

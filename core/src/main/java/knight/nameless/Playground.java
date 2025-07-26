@@ -3,12 +3,10 @@ package knight.nameless;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -22,7 +20,6 @@ public class Playground extends ApplicationAdapter {
     public final int SCREEN_HEIGHT = 640;
     private SpriteBatch batch;
     private BitmapFont font;
-    private ShapeRenderer shapeRenderer;
     public ExtendViewport viewport;
     public OrthographicCamera camera;
     private final int TOTAL_ROWS = 9;
@@ -50,7 +47,6 @@ public class Playground extends ApplicationAdapter {
 
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
-        shapeRenderer = new ShapeRenderer();
         batch = new SpriteBatch();
         font = new BitmapFont();
 
@@ -153,7 +149,6 @@ public class Playground extends ApplicationAdapter {
                             if (actualCell.index == mineCellIndex) {
 
                                 actualCell.isMined = true;
-                                actualCell.sprite = mineTexture;
                                 break;
                             }
                         }
@@ -298,49 +293,7 @@ public class Playground extends ApplicationAdapter {
         if (!isGameOver)
             update(mouseBounds);
 
-        ScreenUtils.clear(Color.BLACK);
-
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
-
-        var topBounds = new Rectangle(0, SCREEN_HEIGHT - 130, SCREEN_WIDTH, SCREEN_HEIGHT);
-        shapeRenderer.rect(topBounds.x, topBounds.y, topBounds.width, topBounds.height);
-
-        var bottomBounds = new Rectangle(0, 0, SCREEN_WIDTH, 92);
-        shapeRenderer.rect(bottomBounds.x, bottomBounds.y, bottomBounds.width, bottomBounds.height);
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                var actualCell = gameGrid[row][column];
-
-                shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
-
-                shapeRenderer.rect(
-                    actualCell.bounds.x,
-                    actualCell.bounds.y,
-                    actualCell.bounds.width,
-                    actualCell.bounds.height
-                );
-
-                if (selectedCellsIndexes.contains(actualCell.index, true)) {
-
-                    shapeRenderer.setColor(Color.DARK_GRAY);
-
-                    shapeRenderer.rect(
-                        actualCell.bounds.x,
-                        actualCell.bounds.y,
-                        actualCell.bounds.width,
-                        actualCell.bounds.height
-                    );
-                }
-            }
-        }
-
-        shapeRenderer.end();
+        ScreenUtils.clear(0.74f, 0.74f, 0.74f, 1);
 
         var flaggedCells = getFlaggedCells();
 
@@ -357,33 +310,35 @@ public class Playground extends ApplicationAdapter {
 
         batch.draw(smileyTexture, smileyBounds.x, smileyBounds.y, smileyBounds.width, smileyBounds.height);
 
+        int selectedMineIndex = 0;
+
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
                 var actualCell = gameGrid[row][column];
 
-//                batch.draw(
-//                    unknownCellTexture,
-//                    actualCell.bounds.x,
-//                    actualCell.bounds.y,
-//                    actualCell.bounds.width,
-//                    actualCell.bounds.height
-//                );
+                batch.draw(
+                    unknownCellTexture,
+                    actualCell.bounds.x,
+                    actualCell.bounds.y,
+                    actualCell.bounds.width,
+                    actualCell.bounds.height
+                );
 
                 if (selectedCellsIndexes.contains(actualCell.index, true)) {
 
-//                    batch.draw(
-//                        emptyCellTexture,
-//                        actualCell.bounds.x,
-//                        actualCell.bounds.y,
-//                        actualCell.bounds.width,
-//                        actualCell.bounds.height
-//                    );
+                    batch.draw(
+                        emptyCellTexture,
+                        actualCell.bounds.x,
+                        actualCell.bounds.y,
+                        actualCell.bounds.width,
+                        actualCell.bounds.height
+                    );
 
                     if (actualCell.isMined) {
 
-                        isGameOver = true;
+                        selectedMineIndex = actualCell.index;
 
                         batch.draw(
                             explodedMineTexture,
@@ -393,24 +348,28 @@ public class Playground extends ApplicationAdapter {
                             actualCell.bounds.height
                         );
 
-                        for (var minedCell : getMinedCells()) {
-
-                            if (minedCell.index == actualCell.index)
-                                continue;
-
-                            batch.draw(
-                                mineTexture,
-                                minedCell.bounds.x,
-                                minedCell.bounds.y,
-                                minedCell.bounds.width,
-                                minedCell.bounds.height
-                            );
-                        }
-//                        resetGame();
+                        isGameOver = true;
                     }
 
                     if (adjacentToMinesCellsIndexes.contains(actualCell.index, true))
                         actualCell.draw(batch);
+                }
+
+                if (isGameOver) {
+
+                    for (var minedCell : getMinedCells()) {
+
+                        if (minedCell.index == selectedMineIndex)
+                            continue;
+
+                        batch.draw(
+                            mineTexture,
+                            minedCell.bounds.x,
+                            minedCell.bounds.y,
+                            minedCell.bounds.width,
+                            minedCell.bounds.height
+                        );
+                    }
                 }
 
                 for (var flaggedCell : flaggedCells) {
@@ -518,7 +477,6 @@ public class Playground extends ApplicationAdapter {
     public void dispose() {
 
         batch.dispose();
-        shapeRenderer.dispose();
         font.dispose();
 
         for (int row = 0; row < TOTAL_ROWS; row++) {

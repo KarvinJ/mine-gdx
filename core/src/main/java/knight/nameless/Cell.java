@@ -10,6 +10,7 @@ public class Cell {
     public Texture sprite;
     public boolean isMined;
     public int mineCounter;
+    public boolean isFlagged;
 
     public Cell(int cellIndex, Rectangle cellBounds) {
         index = cellIndex;

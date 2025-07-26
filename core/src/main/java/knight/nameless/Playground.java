@@ -238,6 +238,12 @@ public class Playground extends ApplicationAdapter {
 
                     if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
+                        if (actualCell.isFlagged) {
+
+                            actualCell.isFlagged = false;
+                            break;
+                        }
+
                         if (mineCellsIndexes.size == 0)
                             initializeMineField(actualCell.index);
 
@@ -246,10 +252,9 @@ public class Playground extends ApplicationAdapter {
                             selectedCellsIndexes.add(actualCell.index);
                             checkForCleanCells(actualCell, row, column);
                         }
-                    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !isAlreadyOpen) {
-
-                        actualCell.isFlagged = !actualCell.isFlagged;
                     }
+                    else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !isAlreadyOpen)
+                        actualCell.isFlagged = !actualCell.isFlagged;
                 }
             }
         }

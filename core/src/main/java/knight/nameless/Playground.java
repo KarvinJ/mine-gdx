@@ -28,11 +28,15 @@ public class Playground extends ApplicationAdapter {
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
     private final int TOTAL_MINES = 10;
+    private boolean isGameOver = false;
     private Cell[][] gameGrid;
     private Array<Integer> selectedCellsIndexes;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
+    private Texture explodedMineTexture;
     private Texture mineTexture;
+    private Texture emptyCellTexture;
+    private Texture unknownCellTexture;
     private Texture flagTexture;
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
@@ -59,7 +63,10 @@ public class Playground extends ApplicationAdapter {
 
         mineCellsIndexes = new Array<>();
 
+        unknownCellTexture = new Texture("img/TileUnknown.png");
+        emptyCellTexture = new Texture("img/TileEmpty.png");
         mineTexture = new Texture("img/TileMine.png");
+        explodedMineTexture = new Texture("img/TileExploded.png");
         flagTexture = new Texture("img/TileFlag.png");
         smileyTexture = new Texture("img/TileSmiley.png");
 
@@ -95,6 +102,24 @@ public class Playground extends ApplicationAdapter {
         }
 
         return flaggedCells;
+    }
+
+    private Array<Cell> getMinedCells() {
+
+        var minedCells = new Array<Cell>();
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (actualCell.isMined)
+                    minedCells.add(actualCell);
+            }
+        }
+
+        return minedCells;
     }
 
     private void initializeMineField(int firstSelectedIndex) {
@@ -226,9 +251,6 @@ public class Playground extends ApplicationAdapter {
 
     private void update(Rectangle mouseBounds) {
 
-        if (Gdx.input.isKeyPressed(Input.Keys.R))
-            resetGame();
-
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
@@ -273,7 +295,8 @@ public class Playground extends ApplicationAdapter {
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
             resetGame();
 
-        update(mouseBounds);
+        if (!isGameOver)
+            update(mouseBounds);
 
         ScreenUtils.clear(Color.BLACK);
 
@@ -324,6 +347,14 @@ public class Playground extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
+        int totalFlags = TOTAL_MINES - flaggedCells.size;
+        font.draw(batch, String.valueOf(totalFlags), 60, SCREEN_HEIGHT - 20);
+
+        if (!isGameOver && !mineCellsIndexes.isEmpty())
+            time += Gdx.graphics.getDeltaTime();
+
+        font.draw(batch, String.valueOf((int) time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
+
         batch.draw(smileyTexture, smileyBounds.x, smileyBounds.y, smileyBounds.width, smileyBounds.height);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -332,11 +363,49 @@ public class Playground extends ApplicationAdapter {
 
                 var actualCell = gameGrid[row][column];
 
+//                batch.draw(
+//                    unknownCellTexture,
+//                    actualCell.bounds.x,
+//                    actualCell.bounds.y,
+//                    actualCell.bounds.width,
+//                    actualCell.bounds.height
+//                );
+
                 if (selectedCellsIndexes.contains(actualCell.index, true)) {
+
+//                    batch.draw(
+//                        emptyCellTexture,
+//                        actualCell.bounds.x,
+//                        actualCell.bounds.y,
+//                        actualCell.bounds.width,
+//                        actualCell.bounds.height
+//                    );
 
                     if (actualCell.isMined) {
 
-                        actualCell.draw(batch);
+                        isGameOver = true;
+
+                        batch.draw(
+                            explodedMineTexture,
+                            actualCell.bounds.x,
+                            actualCell.bounds.y,
+                            actualCell.bounds.width,
+                            actualCell.bounds.height
+                        );
+
+                        for (var minedCell : getMinedCells()) {
+
+                            if (minedCell.index == actualCell.index)
+                                continue;
+
+                            batch.draw(
+                                mineTexture,
+                                minedCell.bounds.x,
+                                minedCell.bounds.y,
+                                minedCell.bounds.width,
+                                minedCell.bounds.height
+                            );
+                        }
 //                        resetGame();
                     }
 
@@ -357,19 +426,12 @@ public class Playground extends ApplicationAdapter {
             }
         }
 
-        int totalFlags = TOTAL_MINES - flaggedCells.size;
-        font.draw(batch, String.valueOf(totalFlags), 60, SCREEN_HEIGHT - 20);
-
-        if (!mineCellsIndexes.isEmpty())
-            time += Gdx.graphics.getDeltaTime();
-
-        font.draw(batch, String.valueOf((int) time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
-
         batch.end();
     }
 
     private void resetGame() {
 
+        isGameOver = false;
         selectedCellsIndexes.clear();
         mineCellsIndexes.clear();
         adjacentToMinesCellsIndexes.clear();
@@ -462,7 +524,6 @@ public class Playground extends ApplicationAdapter {
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
                 gameGrid[row][column].dispose();
             }
         }

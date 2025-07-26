@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -28,6 +29,8 @@ public class Playground extends ApplicationAdapter {
     private Array<Integer> selectedCellsIndexes;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
+    private Texture mineTexture;
+    private Array<Texture> tileNumberTextures;
 
     @Override
     public void create() {
@@ -48,6 +51,16 @@ public class Playground extends ApplicationAdapter {
         adjacentToMinesCellsIndexes = new Array<>();
 
         mineCellsIndexes = new Array<>();
+
+        mineTexture = new Texture("img/TileMine.png");
+
+        tileNumberTextures = new Array<>();
+        tileNumberTextures.add(
+            new Texture("img/Tile1.png"),
+            new Texture("img/Tile2.png"),
+            new Texture("img/Tile3.png"),
+            new Texture("img/Tile4.png")
+        );
     }
 
     private void initializeMineField(int firstSelectedIndex) {
@@ -81,6 +94,7 @@ public class Playground extends ApplicationAdapter {
                             if (actualCell.index == mineCellIndex) {
 
                                 actualCell.isMined = true;
+                                actualCell.sprite = mineTexture;
                                 break;
                             }
                         }
@@ -137,6 +151,8 @@ public class Playground extends ApplicationAdapter {
 
                 if (mineCounter > 0) {
 
+                    if (mineCounter - 1 <= 3)
+                        actualCell.sprite = tileNumberTextures.get(mineCounter - 1);
                     actualCell.mineCounter = mineCounter;
                     adjacentToMinesCellsIndexes.add(actualCell.index);
                 }
@@ -175,24 +191,12 @@ public class Playground extends ApplicationAdapter {
         viewport.update(width, height);
     }
 
-    @Override
-    public void render() {
+    private void update() {
 
         if (Gdx.input.isKeyPressed(Input.Keys.R))
             resetGame();
 
-        ScreenUtils.clear(Color.BLACK);
-
-//        batch.setProjectionMatrix(viewport.getCamera().combined);
-//        batch.begin();
-//
-//        batch.end();
-
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-
         var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -214,6 +218,25 @@ public class Playground extends ApplicationAdapter {
                         checkForCleanCells(actualCell, row, column);
                     }
                 }
+            }
+        }
+    }
+
+    @Override
+    public void render() {
+
+        update();
+
+        ScreenUtils.clear(Color.BLACK);
+
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
 
                 shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
 
@@ -228,27 +251,20 @@ public class Playground extends ApplicationAdapter {
 
                     shapeRenderer.setColor(Color.DARK_GRAY);
 
-                    if (actualCell.isMined) {
-
-                        shapeRenderer.setColor(Color.RED);
-
-//                        resetGame();
-                    }
-
-                    if (adjacentToMinesCellsIndexes.contains(actualCell.index, true)) {
-
-                        if (actualCell.mineCounter == 1)
-                            shapeRenderer.setColor(Color.BLUE);
-
-                        else if (actualCell.mineCounter == 2)
-                            shapeRenderer.setColor(Color.GREEN);
-
-                        else if (actualCell.mineCounter == 3)
-                            shapeRenderer.setColor(Color.GOLD);
-
-                        else
-                            shapeRenderer.setColor(Color.SCARLET);
-                    }
+//                    if (adjacentToMinesCellsIndexes.contains(actualCell.index, true)) {
+//
+//                        if (actualCell.mineCounter == 1)
+//                            shapeRenderer.setColor(Color.BLUE);
+//
+//                        else if (actualCell.mineCounter == 2)
+//                            shapeRenderer.setColor(Color.GREEN);
+//
+//                        else if (actualCell.mineCounter == 3)
+//                            shapeRenderer.setColor(Color.GOLD);
+//
+//                        else
+//                            shapeRenderer.setColor(Color.SCARLET);
+//                    }
 
                     shapeRenderer.rect(
                         actualCell.bounds.x,
@@ -261,6 +277,31 @@ public class Playground extends ApplicationAdapter {
         }
 
         shapeRenderer.end();
+
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        batch.begin();
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (selectedCellsIndexes.contains(actualCell.index, true)) {
+
+                    if (actualCell.isMined)
+                        actualCell.draw(batch);
+
+
+                    if (adjacentToMinesCellsIndexes.contains(actualCell.index, true)) {
+
+                        actualCell.draw(batch);
+                    }
+                }
+            }
+        }
+
+        batch.end();
     }
 
     private void resetGame() {
@@ -291,6 +332,17 @@ public class Playground extends ApplicationAdapter {
             if (previousRow < TOTAL_ROWS && gameGrid[previousRow][selectedColumn].isMined)
                 break;
 
+            for (int column = selectedColumn; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (actualCell.isMined)
+                    break;
+
+                if (!selectedCellsIndexes.contains(actualCell.index, true))
+                    selectedCellsIndexes.add(gameGrid[row][column].index);
+            }
+
             for (int column = selectedColumn; column >= 0; column--) {
 
                 var actualCell = gameGrid[row][column];
@@ -311,6 +363,17 @@ public class Playground extends ApplicationAdapter {
                 break;
 
             for (int column = selectedColumn; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (actualCell.isMined)
+                    break;
+
+                if (!selectedCellsIndexes.contains(actualCell.index, true))
+                    selectedCellsIndexes.add(gameGrid[row][column].index);
+            }
+
+            for (int column = selectedColumn; column >= 0; column--) {
 
                 var actualCell = gameGrid[row][column];
 

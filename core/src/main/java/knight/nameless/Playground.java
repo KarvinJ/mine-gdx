@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -20,6 +21,7 @@ public class Playground extends ApplicationAdapter {
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 640;
     private SpriteBatch batch;
+    private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     public ExtendViewport viewport;
     public OrthographicCamera camera;
@@ -49,6 +51,7 @@ public class Playground extends ApplicationAdapter {
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         batch = new SpriteBatch();
+        shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
 
         gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
@@ -294,7 +297,22 @@ public class Playground extends ApplicationAdapter {
         if (!isGameOver)
             update(mouseBounds);
 
-        ScreenUtils.clear(Color.DARK_GRAY);
+        ScreenUtils.clear(Color.LIGHT_GRAY);
+
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        shapeRenderer.setColor(Color.DARK_GRAY);
+
+        var backgroundBonds = new Rectangle(-2, 92, SCREEN_WIDTH, 420);
+        shapeRenderer.rect(
+            backgroundBonds.x,
+            backgroundBonds.y,
+            backgroundBonds.width,
+            backgroundBonds.height
+        );
+
+        shapeRenderer.end();
 
         var flaggedCells = getFlaggedCells();
 
@@ -309,7 +327,13 @@ public class Playground extends ApplicationAdapter {
 
         font.draw(batch, String.valueOf((int) time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
 
-        batch.draw(smileyTexture, smileyBounds.x, smileyBounds.y, smileyBounds.width, smileyBounds.height);
+        batch.draw(
+            smileyTexture,
+            smileyBounds.x,
+            smileyBounds.y,
+            smileyBounds.width,
+            smileyBounds.height
+        );
 
         int selectedMineIndex = 0;
 
@@ -478,6 +502,7 @@ public class Playground extends ApplicationAdapter {
     public void dispose() {
 
         batch.dispose();
+        shapeRenderer.dispose();
         font.dispose();
 
         for (int row = 0; row < TOTAL_ROWS; row++) {

@@ -3,6 +3,7 @@ package knight.nameless;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -293,7 +294,7 @@ public class Playground extends ApplicationAdapter {
         if (!isGameOver)
             update(mouseBounds);
 
-        ScreenUtils.clear(0.74f, 0.74f, 0.74f, 1);
+        ScreenUtils.clear(Color.DARK_GRAY);
 
         var flaggedCells = getFlaggedCells();
 

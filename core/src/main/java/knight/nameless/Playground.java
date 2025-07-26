@@ -374,6 +374,7 @@ public class Playground extends ApplicationAdapter {
                         );
 
                         isGameOver = true;
+                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 25, SCREEN_HEIGHT - 20);
                     }
 
                     if (adjacentToMinesCellsIndexes.contains(actualCell.index, true))
@@ -406,6 +407,25 @@ public class Playground extends ApplicationAdapter {
                         flaggedCell.bounds.width,
                         flaggedCell.bounds.height
                     );
+                }
+
+                int foundMines = 0;
+
+                for (var flaggedCell : flaggedCells) {
+
+                    for (var minedCell : getMinedCells()) {
+
+                        if (flaggedCell.index == minedCell.index) {
+                            foundMines++;
+                            break;
+                        }
+                    }
+                }
+
+                if (foundMines == TOTAL_MINES) {
+
+                    isGameOver = true;
+                    font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 25, SCREEN_HEIGHT - 20);
                 }
             }
         }

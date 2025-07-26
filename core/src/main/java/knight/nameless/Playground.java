@@ -464,32 +464,35 @@ public class Playground extends ApplicationAdapter {
     }
 
     // Main function to perform flood fill
-    private int[][] floodFill(int[][] image, int selectedRow, int selectedColumn, int newColor){
+    private int[][] floodFill(int[][] grid, int selectedRow, int selectedColumn, int newColor){
 
         // Call DFS with the original color of the starting pixel
-        dfs(image, selectedRow, selectedColumn, image[selectedRow][selectedColumn], newColor);
+        dfs(grid, selectedRow, selectedColumn, grid[selectedRow][selectedColumn], newColor);
 
         // Return the updated image
-        return image;
+        return grid;
     }
 
-    private void dfs(int[][] image, int x, int y, int actualIndex, int newColor){
+    private void dfs(int[][] grid, int row, int column, int actualIndex, int newColor){
 
         // Base case: check for out-of-bound indices or mismatched color
-        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y] != actualIndex) {
+        if (row < 0 || row >= grid.length || column < 0 || column >= grid[0].length || grid[row][column] != actualIndex) {
             return; // Backtrack if invalid
         }
 
         // Change the color of the current pixel
 //        image[x][y] = newColor;
 
-        selectedCellsIndexes.add(image[x][y]);
+        var selectedIndex = grid[row][column];
+
+//        if (!selectedCellsIndexes.contains(selectedIndex, true))
+            selectedCellsIndexes.add(selectedIndex);
 
         // Recursively call DFS in all four directions
-        dfs(image, x + 1, y, actualIndex, newColor);
-        dfs(image, x - 1, y, actualIndex, newColor);
-        dfs(image, x, y + 1, actualIndex, newColor);
-        dfs(image, x, y - 1, actualIndex, newColor);
+        dfs(grid, row + 1, column, actualIndex, newColor);
+        dfs(grid, row - 1, column, actualIndex, newColor);
+        dfs(grid, row, column + 1, actualIndex, newColor);
+        dfs(grid, row, column - 1, actualIndex, newColor);
     }
 
     @Override

@@ -30,6 +30,7 @@ public class Playground extends ApplicationAdapter {
     private final int TOTAL_MINES = 10;
     private boolean isGameOver = false;
     private Cell[][] gameGrid;
+    private int[][] gameGridIndexes;
     private Array<Integer> selectedCellsIndexes;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
@@ -54,9 +55,10 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
 
+        gameGridIndexes = new int[TOTAL_ROWS][TOTAL_COLUMNS];
         gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
 
-        initializeGrid(gameGrid);
+        initializeGrid(gameGrid, gameGridIndexes);
 
         selectedCellsIndexes = new Array<>();
         adjacentToMinesCellsIndexes = new Array<>();
@@ -217,7 +219,7 @@ public class Playground extends ApplicationAdapter {
         }
     }
 
-    private void initializeGrid(Cell[][] grid) {
+    private void initializeGrid(Cell[][] grid, int[][] gameGridIndexes) {
 
         int index = 0;
 
@@ -238,6 +240,7 @@ public class Playground extends ApplicationAdapter {
                 );
 
                 grid[row][column] = new Cell(index, actualCellBounds);
+                gameGridIndexes[row][column] = index;
                 index++;
             }
         }
@@ -457,65 +460,36 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
-        for (int row = selectedRow; row >= 0; row--) {
+        int[][] result = floodFill(gameGridIndexes, selectedRow, selectedColumn, 0);
+    }
 
-            var previousRow = row + 1;
+    // Main function to perform flood fill
+    private int[][] floodFill(int[][] image, int selectedRow, int selectedColumn, int newColor){
 
-            if (previousRow < TOTAL_ROWS && gameGrid[previousRow][selectedColumn].isMined)
-                break;
+        // Call DFS with the original color of the starting pixel
+        dfs(image, selectedRow, selectedColumn, image[selectedRow][selectedColumn], newColor);
 
-            for (int column = selectedColumn; column < TOTAL_COLUMNS; column++) {
+        // Return the updated image
+        return image;
+    }
 
-                var actualCell = gameGrid[row][column];
+    private void dfs(int[][] image, int x, int y, int actualIndex, int newColor){
 
-                if (actualCell.isMined)
-                    break;
-
-                if (!selectedCellsIndexes.contains(actualCell.index, true))
-                    selectedCellsIndexes.add(gameGrid[row][column].index);
-            }
-
-            for (int column = selectedColumn; column >= 0; column--) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isMined)
-                    break;
-
-                if (!selectedCellsIndexes.contains(actualCell.index, true))
-                    selectedCellsIndexes.add(gameGrid[row][column].index);
-            }
+        // Base case: check for out-of-bound indices or mismatched color
+        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y] != actualIndex) {
+            return; // Backtrack if invalid
         }
 
-        for (int row = selectedRow; row < TOTAL_ROWS; row++) {
+        // Change the color of the current pixel
+//        image[x][y] = newColor;
 
-            var previousRow = row - 1;
+        selectedCellsIndexes.add(image[x][y]);
 
-            if (previousRow >= 0 && gameGrid[previousRow][selectedColumn].isMined)
-                break;
-
-            for (int column = selectedColumn; column < TOTAL_COLUMNS; column++) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isMined)
-                    break;
-
-                if (!selectedCellsIndexes.contains(actualCell.index, true))
-                    selectedCellsIndexes.add(gameGrid[row][column].index);
-            }
-
-            for (int column = selectedColumn; column >= 0; column--) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isMined)
-                    break;
-
-                if (!selectedCellsIndexes.contains(actualCell.index, true))
-                    selectedCellsIndexes.add(gameGrid[row][column].index);
-            }
-        }
+        // Recursively call DFS in all four directions
+        dfs(image, x + 1, y, actualIndex, newColor);
+        dfs(image, x - 1, y, actualIndex, newColor);
+        dfs(image, x, y + 1, actualIndex, newColor);
+        dfs(image, x, y - 1, actualIndex, newColor);
     }
 
     @Override

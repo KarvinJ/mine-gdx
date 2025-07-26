@@ -256,8 +256,7 @@ public class Playground extends ApplicationAdapter {
                             selectedCellsIndexes.add(actualCell.index);
                             checkForCleanCells(actualCell, row, column);
                         }
-                    }
-                    else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !isAlreadyOpen)
+                    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !isAlreadyOpen)
                         actualCell.isFlagged = !actualCell.isFlagged;
                 }
             }
@@ -347,7 +346,7 @@ public class Playground extends ApplicationAdapter {
         if (!mineCellsIndexes.isEmpty())
             time += Gdx.graphics.getDeltaTime();
 
-        font.draw(batch, String.valueOf((int)time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
+        font.draw(batch, String.valueOf((int) time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
 
         batch.end();
     }
@@ -438,6 +437,17 @@ public class Playground extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+
         batch.dispose();
+        shapeRenderer.dispose();
+        font.dispose();
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                gameGrid[row][column].dispose();
+            }
+        }
     }
 }

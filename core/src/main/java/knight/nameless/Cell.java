@@ -20,4 +20,10 @@ public class Cell {
     public void draw(Batch batch) {
         batch.draw(sprite, bounds.x, bounds.y, bounds.width, bounds.height);
     }
+
+    public void dispose(){
+
+        if (sprite != null)
+            sprite.dispose();
+    }
 }

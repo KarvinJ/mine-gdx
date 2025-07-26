@@ -34,6 +34,7 @@ public class Playground extends ApplicationAdapter {
     private Array<Integer> mineCellsIndexes;
     private Texture mineTexture;
     private Texture flagTexture;
+    private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private float time = 0;
 
@@ -60,6 +61,7 @@ public class Playground extends ApplicationAdapter {
 
         mineTexture = new Texture("img/TileMine.png");
         flagTexture = new Texture("img/TileFlag.png");
+        smileyTexture = new Texture("img/TileSmiley.png");
 
         tileNumberTextures = new Array<>();
         tileNumberTextures.add(
@@ -222,13 +224,10 @@ public class Playground extends ApplicationAdapter {
         viewport.update(width, height);
     }
 
-    private void update() {
+    private void update(Rectangle mouseBounds) {
 
         if (Gdx.input.isKeyPressed(Input.Keys.R))
             resetGame();
-
-        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-        var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
@@ -266,12 +265,28 @@ public class Playground extends ApplicationAdapter {
     @Override
     public void render() {
 
-        update();
+        Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
+
+        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 40 / 2f, SCREEN_HEIGHT - 80, 40, 40);
+
+        if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
+            resetGame();
+
+        update(mouseBounds);
 
         ScreenUtils.clear(Color.BLACK);
 
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        shapeRenderer.setColor(0.74f, 0.74f, 0.74f, 1);
+
+        var topBounds = new Rectangle(0, SCREEN_HEIGHT - 130, SCREEN_WIDTH, SCREEN_HEIGHT);
+        shapeRenderer.rect(topBounds.x, topBounds.y, topBounds.width, topBounds.height);
+
+        var bottomBounds = new Rectangle(0, 0, SCREEN_WIDTH, 92);
+        shapeRenderer.rect(bottomBounds.x, bottomBounds.y, bottomBounds.width, bottomBounds.height);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
@@ -308,6 +323,8 @@ public class Playground extends ApplicationAdapter {
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
+
+        batch.draw(smileyTexture, smileyBounds.x, smileyBounds.y, smileyBounds.width, smileyBounds.height);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 

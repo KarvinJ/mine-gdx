@@ -212,7 +212,6 @@ public class Playground extends ApplicationAdapter {
 
                     actualCell.cellValue = mineCounter;
                     actualCell.sprite = tileNumberTextures.get(mineCounter - 1);
-                    actualCell.mineCounter = mineCounter;
                     adjacentToMinesCellsIndexes.add(actualCell.index);
                 }
             }
@@ -450,7 +449,6 @@ public class Playground extends ApplicationAdapter {
 
                 gameGrid[row][column].isFlagged = false;
                 gameGrid[row][column].isMined = false;
-                gameGrid[row][column].mineCounter = 0;
                 gameGrid[row][column].cellValue = 0;
             }
         }
@@ -458,7 +456,7 @@ public class Playground extends ApplicationAdapter {
 
     private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
 
-        if (selectedCell.isMined || selectedCell.mineCounter > 0)
+        if (selectedCell.isMined || selectedCell.cellValue > 0)
             return;
 
         var result = floodFill(gameGrid, selectedRow, selectedColumn);

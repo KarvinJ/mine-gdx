@@ -402,40 +402,7 @@ public class Playground extends ApplicationAdapter {
                         );
                     }
 
-                    for (var flaggedCell : flaggedCells) {
-
-                        var wrongCellFlagged = true;
-
-                        for (var minedCell : minedCells) {
-
-                            if (flaggedCell.index == minedCell.index) {
-
-                                wrongCellFlagged = false;
-                                break;
-                            }
-                        }
-
-                        if (wrongCellFlagged) {
-
-                            batch.draw(
-                                wrongFlagTexture,
-                                flaggedCell.bounds.x,
-                                flaggedCell.bounds.y,
-                                flaggedCell.bounds.width,
-                                flaggedCell.bounds.height
-                            );
-                        }
-                        else {
-                            
-                            batch.draw(
-                                flagTexture,
-                                flaggedCell.bounds.x,
-                                flaggedCell.bounds.y,
-                                flaggedCell.bounds.width,
-                                flaggedCell.bounds.height
-                            );
-                        }
-                    }
+                    renderGameOverFlags(flaggedCells, minedCells);
                 }
                 else {
 
@@ -475,6 +442,44 @@ public class Playground extends ApplicationAdapter {
         }
 
         batch.end();
+    }
+
+    private void renderGameOverFlags(Array<Cell> flaggedCells, Array<Cell> minedCells) {
+        
+        for (var flaggedCell : flaggedCells) {
+
+            var wrongCellFlagged = true;
+
+            for (var minedCell : minedCells) {
+
+                if (flaggedCell.index == minedCell.index) {
+
+                    wrongCellFlagged = false;
+                    break;
+                }
+            }
+
+            if (wrongCellFlagged) {
+
+                batch.draw(
+                    wrongFlagTexture,
+                    flaggedCell.bounds.x,
+                    flaggedCell.bounds.y,
+                    flaggedCell.bounds.width,
+                    flaggedCell.bounds.height
+                );
+            }
+            else {
+
+                batch.draw(
+                    flagTexture,
+                    flaggedCell.bounds.x,
+                    flaggedCell.bounds.y,
+                    flaggedCell.bounds.width,
+                    flaggedCell.bounds.height
+                );
+            }
+        }
     }
 
     private void resetGame() {

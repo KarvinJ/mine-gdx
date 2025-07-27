@@ -27,7 +27,6 @@ public class Playground extends ApplicationAdapter {
     public OrthographicCamera camera;
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
-    private final int TOTAL_MINES = 10;
     private boolean isGameOver = false;
     private Cell[][] gameGrid;
     private Array<Integer> selectedCellsIndexes;
@@ -126,6 +125,7 @@ public class Playground extends ApplicationAdapter {
 
         int gridMaxIndex = TOTAL_ROWS * TOTAL_COLUMNS;
 
+        final int TOTAL_MINES = 10;
         for (int i = 0; i < TOTAL_MINES; i++) {
 
             var isAlreadyAdded = true;
@@ -317,11 +317,12 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer.end();
 
         var flaggedCells = getFlaggedCells();
+        var minedCells = getMinedCells();
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        int totalFlags = TOTAL_MINES - flaggedCells.size;
+        int totalFlags = minedCells.size - flaggedCells.size;
         font.draw(batch, String.valueOf(totalFlags), 60, SCREEN_HEIGHT - 20);
 
         if (!isGameOver && !mineCellsIndexes.isEmpty())
@@ -415,7 +416,7 @@ public class Playground extends ApplicationAdapter {
 
                 for (var flaggedCell : flaggedCells) {
 
-                    for (var minedCell : getMinedCells()) {
+                    for (var minedCell : minedCells) {
 
                         if (flaggedCell.index == minedCell.index) {
                             foundMines++;
@@ -424,7 +425,8 @@ public class Playground extends ApplicationAdapter {
                     }
                 }
 
-                if (foundMines == TOTAL_MINES) {
+                //for some reason sometimes there is only 9 mines instead of 10
+                if (!minedCells.isEmpty() && foundMines == minedCells.size) {
 
                     isGameOver = true;
                     font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 25, SCREEN_HEIGHT - 20);

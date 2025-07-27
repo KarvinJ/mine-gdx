@@ -426,7 +426,7 @@ public class Playground extends ApplicationAdapter {
                 }
 
                 //for some reason sometimes there is only 9 mines instead of 10
-                if (!minedCells.isEmpty() && foundMines == minedCells.size) {
+                if (!minedCells.isEmpty() && totalFlags == 0 && foundMines == minedCells.size) {
 
                     isGameOver = true;
                     font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 25, SCREEN_HEIGHT - 20);
@@ -513,7 +513,7 @@ public class Playground extends ApplicationAdapter {
 
     private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn){
 
-        //default value to change.
+        //default value to change my empty spaces.
         final int newValue = 10;
 
         // If the starting pixel already has the new color, no need
@@ -534,7 +534,6 @@ public class Playground extends ApplicationAdapter {
         // Base case: check for out-of-bound indices or mismatched color
         if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue)
             return; // Backtrack if invalid
-
 
         // Change the color of the current pixel
         image[x][y].cellValue = newValue;

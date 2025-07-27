@@ -37,6 +37,7 @@ public class Playground extends ApplicationAdapter {
     private Texture emptyCellTexture;
     private Texture unknownCellTexture;
     private Texture flagTexture;
+    private Texture wrongFlagTexture;
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private float time = 0;
@@ -67,6 +68,7 @@ public class Playground extends ApplicationAdapter {
         mineTexture = new Texture("img/TileMine.png");
         explodedMineTexture = new Texture("img/TileExploded.png");
         flagTexture = new Texture("img/TileFlag.png");
+        wrongFlagTexture = new Texture("img/TileFlagWrong.png");
         smileyTexture = new Texture("img/TileSmiley.png");
 
         tileNumberTextures = new Array<>();
@@ -306,7 +308,7 @@ public class Playground extends ApplicationAdapter {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var backgroundBonds = new Rectangle(-2, 92, SCREEN_WIDTH +2, 420);
+        var backgroundBonds = new Rectangle(-2, 92, SCREEN_WIDTH + 2, 420);
         shapeRenderer.rect(
             backgroundBonds.x,
             backgroundBonds.y,
@@ -399,17 +401,54 @@ public class Playground extends ApplicationAdapter {
                             minedCell.bounds.height
                         );
                     }
+
+                    for (var flaggedCell : flaggedCells) {
+
+                        var wrongCellFlagged = true;
+
+                        for (var minedCell : minedCells) {
+
+                            if (flaggedCell.index == minedCell.index) {
+
+                                wrongCellFlagged = false;
+                                break;
+                            }
+                        }
+
+                        if (wrongCellFlagged) {
+
+                            batch.draw(
+                                wrongFlagTexture,
+                                flaggedCell.bounds.x,
+                                flaggedCell.bounds.y,
+                                flaggedCell.bounds.width,
+                                flaggedCell.bounds.height
+                            );
+                        }
+                        else {
+                            
+                            batch.draw(
+                                flagTexture,
+                                flaggedCell.bounds.x,
+                                flaggedCell.bounds.y,
+                                flaggedCell.bounds.width,
+                                flaggedCell.bounds.height
+                            );
+                        }
+                    }
                 }
+                else {
 
-                for (var flaggedCell : flaggedCells) {
+                    for (var flaggedCell : flaggedCells) {
 
-                    batch.draw(
-                        flagTexture,
-                        flaggedCell.bounds.x,
-                        flaggedCell.bounds.y,
-                        flaggedCell.bounds.width,
-                        flaggedCell.bounds.height
-                    );
+                        batch.draw(
+                            flagTexture,
+                            flaggedCell.bounds.x,
+                            flaggedCell.bounds.y,
+                            flaggedCell.bounds.width,
+                            flaggedCell.bounds.height
+                        );
+                    }
                 }
 
                 int foundMines = 0;
@@ -425,6 +464,7 @@ public class Playground extends ApplicationAdapter {
                     }
                 }
 
+                //also player can win without revealing all cells. Need to fix both of these issues.
                 //for some reason sometimes there is only 9 mines instead of 10
                 if (!minedCells.isEmpty() && totalFlags == 0 && foundMines == minedCells.size) {
 
@@ -477,7 +517,7 @@ public class Playground extends ApplicationAdapter {
 
                     selectedCellsIndexes.add(actualCell.index);
 
-                    for (var adjacentIndex :adjacentToMinesCellsIndexes) {
+                    for (var adjacentIndex : adjacentToMinesCellsIndexes) {
 
                         var previousColumn = column - 1;
                         var nextColumn = column + 1;
@@ -511,7 +551,7 @@ public class Playground extends ApplicationAdapter {
         }
     }
 
-    private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn){
+    private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn) {
 
         //default value to change my empty spaces.
         final int newValue = 10;
@@ -528,8 +568,8 @@ public class Playground extends ApplicationAdapter {
         return image;
     }
 
-//    In Depth First Search (or DFS) for a graph, we traverse all adjacent vertices one by one.
-    private void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue){
+    //    In Depth First Search (or DFS) for a graph, we traverse all adjacent vertices one by one.
+    private void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue) {
 
         // Base case: check for out-of-bound indices or mismatched color
         if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue)

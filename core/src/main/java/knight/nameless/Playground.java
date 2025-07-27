@@ -445,7 +445,7 @@ public class Playground extends ApplicationAdapter {
     }
 
     private void renderGameOverFlags(Array<Cell> flaggedCells, Array<Cell> minedCells) {
-        
+
         for (var flaggedCell : flaggedCells) {
 
             var wrongCellFlagged = true;
@@ -601,6 +601,7 @@ public class Playground extends ApplicationAdapter {
         smileyTexture.dispose();
         emptyCellTexture.dispose();
         flagTexture.dispose();
+        wrongFlagTexture.dispose();
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 

@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Cell {
+    public int cellValue;
     public final int index;
     public final Rectangle bounds;
     public Texture sprite;

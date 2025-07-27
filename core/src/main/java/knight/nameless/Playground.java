@@ -30,7 +30,6 @@ public class Playground extends ApplicationAdapter {
     private final int TOTAL_MINES = 10;
     private boolean isGameOver = false;
     private Cell[][] gameGrid;
-    private int[][] gameGridIndexes;
     private Array<Integer> selectedCellsIndexes;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
@@ -55,10 +54,9 @@ public class Playground extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
 
-        gameGridIndexes = new int[TOTAL_ROWS][TOTAL_COLUMNS];
         gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
 
-        initializeGrid(gameGrid, gameGridIndexes);
+        initializeGrid(gameGrid);
 
         selectedCellsIndexes = new Array<>();
         adjacentToMinesCellsIndexes = new Array<>();
@@ -154,7 +152,7 @@ public class Playground extends ApplicationAdapter {
 
                             if (actualCell.index == mineCellIndex) {
 
-                                gameGridIndexes[row][column] = -1;
+                                actualCell.cellValue = -1;
                                 actualCell.isMined = true;
                                 break;
                             }
@@ -212,7 +210,7 @@ public class Playground extends ApplicationAdapter {
 
                 if (mineCounter > 0) {
 
-                    gameGridIndexes[row][column] = mineCounter;
+                    actualCell.cellValue = mineCounter;
                     actualCell.sprite = tileNumberTextures.get(mineCounter - 1);
                     actualCell.mineCounter = mineCounter;
                     adjacentToMinesCellsIndexes.add(actualCell.index);
@@ -221,7 +219,7 @@ public class Playground extends ApplicationAdapter {
         }
     }
 
-    private void initializeGrid(Cell[][] grid, int[][] gameGridIndexes) {
+    private void initializeGrid(Cell[][] grid) {
 
         int index = 0;
 
@@ -242,7 +240,7 @@ public class Playground extends ApplicationAdapter {
                 );
 
                 grid[row][column] = new Cell(index, actualCellBounds);
-                gameGridIndexes[row][column] = -2;
+                grid[row][column].cellValue = -2;
                 index++;
             }
         }
@@ -462,17 +460,15 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
-        int[][] result = floodFill(gameGridIndexes, selectedRow, selectedColumn, 0);
+        var result = floodFill(gameGrid, selectedRow, selectedColumn, 0);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
-                var actualCellValue = result[row][column];
+                var actualCell = result[row][column];
 
-                if (actualCellValue == 0) {
-
-                    var actualCell = gameGrid[row][column];
+                if (actualCell.cellValue == 0) {
 
 //                    if (selectedCellsIndexes.contains(actualCell.index, true))
                         selectedCellsIndexes.add(actualCell.index);
@@ -482,37 +478,36 @@ public class Playground extends ApplicationAdapter {
     }
 
     // Main function to perform flood fill
-    int[][] floodFill(int[][] image, int sr, int sc, int newColor){
+    Cell[][] floodFill(Cell[][] image, int sr, int sc, int newColor){
 
         // If the starting pixel already has the new color, no need
         // to process
-        if (image[sr][sc] == newColor) {
+        if (image[sr][sc].cellValue == newColor) {
             return image;
         }
 
         // Call DFS with the original color of the starting pixel
-        dfs(image, sr, sc, image[sr][sc], newColor);
+        dfs(image, sr, sc, image[sr][sc].cellValue, newColor);
 
         // Return the updated image
         return image;
     }
 
-    void dfs(int[][] image, int x, int y, int oldColor, int newColor){
+    void dfs(Cell[][] image, int x, int y, int oldColor, int newColor){
 
         // Base case: check for out-of-bound indices or mismatched color
-        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y] != oldColor) {
+        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldColor) {
             return; // Backtrack if invalid
         }
 
         // Change the color of the current pixel
-        image[x][y] = newColor;
+        image[x][y].cellValue = newColor;
 
         // Recursively call DFS in all four directions
         dfs(image, x + 1, y, oldColor, newColor);
         dfs(image, x - 1, y, oldColor, newColor);
         dfs(image, x, y + 1, oldColor, newColor);
         dfs(image, x, y - 1, oldColor, newColor);
-
     }
 
     @Override

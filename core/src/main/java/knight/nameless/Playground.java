@@ -42,7 +42,7 @@ public class Playground extends ApplicationAdapter {
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
-    private float time = 9;
+    private float time = 0;
 
     @Override
     public void create() {
@@ -107,7 +107,15 @@ public class Playground extends ApplicationAdapter {
         final float height = 64;
         final float positionY = SCREEN_HEIGHT - 90;
 
-        if (number < 10)
+        //need to draw negative numbers and numbers greater than 100
+        if (number < 0) {
+
+//            int positiveNumber = Math.abs(number);
+
+            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
+        }
+
+        else if (number < 10)
             batch.draw(scoreNumbers[number], positionX, positionY, width, height);
         else {
 

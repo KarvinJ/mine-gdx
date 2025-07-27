@@ -123,7 +123,7 @@ public class Playground extends ApplicationAdapter {
 
     private void initializeMineField(int firstSelectedIndex) {
 
-        int gridMaxIndex = TOTAL_ROWS * TOTAL_COLUMNS;
+        int gridSize = TOTAL_ROWS * TOTAL_COLUMNS;
 
         final int TOTAL_MINES = 10;
         for (int i = 0; i < TOTAL_MINES; i++) {
@@ -132,7 +132,7 @@ public class Playground extends ApplicationAdapter {
 
             while (isAlreadyAdded) {
 
-                int mineCellIndex = MathUtils.random(0, gridMaxIndex);
+                int mineCellIndex = MathUtils.random(0, gridSize);
 
                 isAlreadyAdded = mineCellsIndexes.contains(mineCellIndex, true);
 
@@ -458,7 +458,8 @@ public class Playground extends ApplicationAdapter {
 
     private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
 
-        if (selectedCell.isMined || selectedCell.cellValue > 0)
+        //I don't need to evaluate mine cells (9) and adjacent to mine cells
+        if (selectedCell.cellValue > 0)
             return;
 
         var result = floodFill(gameGrid, selectedRow, selectedColumn);
@@ -517,9 +518,8 @@ public class Playground extends ApplicationAdapter {
 
         // If the starting pixel already has the new color, no need
         // to process
-        if (image[selectedRow][selectedColumn].cellValue == newValue) {
+        if (image[selectedRow][selectedColumn].cellValue == newValue)
             return image;
-        }
 
         // Call DFS with the original color of the starting pixel
         depthFirstSearch(image, selectedRow, selectedColumn, image[selectedRow][selectedColumn].cellValue, newValue);
@@ -529,12 +529,12 @@ public class Playground extends ApplicationAdapter {
     }
 
 //    In Depth First Search (or DFS) for a graph, we traverse all adjacent vertices one by one.
-    void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue){
+    private void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue){
 
         // Base case: check for out-of-bound indices or mismatched color
-        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue) {
+        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue)
             return; // Backtrack if invalid
-        }
+
 
         // Change the color of the current pixel
         image[x][y].cellValue = newValue;

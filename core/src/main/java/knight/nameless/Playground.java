@@ -42,7 +42,7 @@ public class Playground extends ApplicationAdapter {
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
-    private float time = 998;
+    private float time = 0;
 
     @Override
     public void create() {
@@ -363,7 +363,7 @@ public class Playground extends ApplicationAdapter {
         Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
         var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
-        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 40 / 2f, SCREEN_HEIGHT - 80, 40, 40);
+        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
             resetGame();
@@ -450,7 +450,7 @@ public class Playground extends ApplicationAdapter {
                         );
 
                         isGameOver = true;
-                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 25, SCREEN_HEIGHT - 20);
+                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
                     }
 
                     if (adjacentToMinesCellsIndexes.contains(actualCell.index, true))
@@ -506,7 +506,7 @@ public class Playground extends ApplicationAdapter {
                 if (!minedCells.isEmpty() && totalFlags == 0 && foundMines == minedCells.size) {
 
                     isGameOver = true;
-                    font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 25, SCREEN_HEIGHT - 20);
+                    font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -40,7 +41,8 @@ public class Playground extends ApplicationAdapter {
     private Texture wrongFlagTexture;
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
-    private float time = 0;
+    private TextureRegion[] scoreNumbers;
+    private float time = 9;
 
     @Override
     public void create() {
@@ -85,6 +87,39 @@ public class Playground extends ApplicationAdapter {
             new Texture("img/Tile7.png"),
             new Texture("img/Tile8.png")
         );
+
+        scoreNumbers = loadTextureSprite();
+    }
+
+    private TextureRegion[] loadTextureSprite() {
+
+        Texture textureToSplit = new Texture("img/numbers.png");
+
+        return TextureRegion.split(
+            textureToSplit, textureToSplit.getWidth() / 10,
+            textureToSplit.getHeight()
+        )[0];
+    }
+
+    private void drawNumbers(SpriteBatch batch, int number, float positionX) {
+
+        final float width = 48;
+        final float height = 64;
+        final float positionY = SCREEN_HEIGHT - 90;
+
+        if (number < 10)
+            batch.draw(scoreNumbers[number], positionX, positionY, width, height);
+        else {
+
+            int tens = number / 10;
+            int units = number % 10;
+
+            var unitsWidth = scoreNumbers[units].getRegionWidth();
+            var tensWidth = scoreNumbers[tens].getRegionWidth() + unitsWidth / 2;
+
+            batch.draw(scoreNumbers[tens], positionX, positionY, width, height);
+            batch.draw(scoreNumbers[units], positionX + tensWidth, positionY, width, height);
+        }
     }
 
     private Array<Cell> getFlaggedCells() {
@@ -325,12 +360,13 @@ public class Playground extends ApplicationAdapter {
         batch.begin();
 
         int totalFlags = minedCells.size - flaggedCells.size;
-        font.draw(batch, String.valueOf(totalFlags), 60, SCREEN_HEIGHT - 20);
+
+        drawNumbers(batch, totalFlags, 60);
 
         if (!isGameOver && !mineCellsIndexes.isEmpty())
             time += Gdx.graphics.getDeltaTime();
 
-        font.draw(batch, String.valueOf((int) time), SCREEN_WIDTH - 60, SCREEN_HEIGHT - 20);
+        drawNumbers(batch, (int) time, SCREEN_WIDTH - 100);
 
         batch.draw(
             smileyTexture,
@@ -403,8 +439,7 @@ public class Playground extends ApplicationAdapter {
                     }
 
                     renderGameOverFlags(flaggedCells, minedCells);
-                }
-                else {
+                } else {
 
                     for (var flaggedCell : flaggedCells) {
 
@@ -468,8 +503,7 @@ public class Playground extends ApplicationAdapter {
                     flaggedCell.bounds.width,
                     flaggedCell.bounds.height
                 );
-            }
-            else {
+            } else {
 
                 batch.draw(
                     flagTexture,

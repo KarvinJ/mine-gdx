@@ -42,7 +42,7 @@ public class Playground extends ApplicationAdapter {
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
-    private float time = 0;
+    private float time = 998;
 
     @Override
     public void create() {
@@ -106,27 +106,54 @@ public class Playground extends ApplicationAdapter {
         final float width = 48;
         final float height = 64;
         final float positionY = SCREEN_HEIGHT - 90;
+        var spaceBetweenNumbers = scoreNumbers[0].getRegionWidth() * 2 - 10;
 
-        //need to draw negative numbers and numbers greater than 100
-        if (number < 0) {
+        if (number > 999) {
 
-//            int positiveNumber = Math.abs(number);
-
-            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
+            batch.draw(scoreNumbers[9], positionX, positionY, width, height);
+            batch.draw(scoreNumbers[9], positionX + spaceBetweenNumbers, positionY, width, height);
+            batch.draw(scoreNumbers[9], positionX + spaceBetweenNumbers * 2, positionY, width, height);
         }
 
-        else if (number < 10)
-            batch.draw(scoreNumbers[number], positionX, positionY, width, height);
-        else {
+        else if (number < 10) {
+
+            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
+            batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
+
+            if (number >= 0)
+                batch.draw(scoreNumbers[number], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+            else
+                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+        }
+        else if (number < 100) {
 
             int tens = number / 10;
             int units = number % 10;
 
-            var unitsWidth = scoreNumbers[units].getRegionWidth();
-            var tensWidth = scoreNumbers[tens].getRegionWidth() + unitsWidth / 2;
+            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
+            batch.draw(scoreNumbers[tens], positionX + spaceBetweenNumbers, positionY, width, height);
+            batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+        }
+        else {
 
-            batch.draw(scoreNumbers[tens], positionX, positionY, width, height);
-            batch.draw(scoreNumbers[units], positionX + tensWidth, positionY, width, height);
+            int hundred = number / 100;
+            int hundredUnits = number % 100;
+
+            batch.draw(scoreNumbers[hundred], positionX, positionY, width, height);
+
+            if (hundredUnits < 10) {
+
+                batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
+                batch.draw(scoreNumbers[hundredUnits], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+            }
+            else {
+
+                int hundredTens = hundredUnits / 10;
+                int hundredUnits2 = hundredUnits % 10;
+
+                batch.draw(scoreNumbers[hundredTens], positionX + spaceBetweenNumbers, positionY, width, height);
+                batch.draw(scoreNumbers[hundredUnits2], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+            }
         }
     }
 
@@ -369,12 +396,12 @@ public class Playground extends ApplicationAdapter {
 
         int totalFlags = minedCells.size - flaggedCells.size;
 
-        drawNumbers(batch, totalFlags, 60);
+        drawNumbers(batch, totalFlags, 40);
 
         if (!isGameOver && !mineCellsIndexes.isEmpty())
             time += Gdx.graphics.getDeltaTime();
 
-        drawNumbers(batch, (int) time, SCREEN_WIDTH - 100);
+        drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
 
         batch.draw(
             smileyTexture,

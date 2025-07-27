@@ -223,7 +223,7 @@ public class Playground extends ApplicationAdapter {
 
         int index = 0;
 
-        int horizontalOffset = 7;
+        int horizontalOffset = 9;
         int cellSize = 45;
         int verticalOffset = 100;
         int cellOffset = 2;
@@ -307,7 +307,7 @@ public class Playground extends ApplicationAdapter {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var backgroundBonds = new Rectangle(-2, 92, SCREEN_WIDTH, 420);
+        var backgroundBonds = new Rectangle(-2, 92, SCREEN_WIDTH +2, 420);
         shapeRenderer.rect(
             backgroundBonds.x,
             backgroundBonds.y,
@@ -511,7 +511,7 @@ public class Playground extends ApplicationAdapter {
     }
 
     private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn){
-        
+
         //default value to change.
         final int newValue = 10;
 

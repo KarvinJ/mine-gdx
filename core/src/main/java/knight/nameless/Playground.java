@@ -58,6 +58,8 @@ public class Playground extends ApplicationAdapter {
 
         initializeGrid(gameGrid);
 
+        printGrid(gameGrid, "initialize");
+
         selectedCellsIndexes = new Array<>();
         adjacentToMinesCellsIndexes = new Array<>();
 
@@ -152,7 +154,7 @@ public class Playground extends ApplicationAdapter {
 
                             if (actualCell.index == mineCellIndex) {
 
-                                actualCell.cellValue = -1;
+                                actualCell.cellValue = 9;
                                 actualCell.isMined = true;
                                 break;
                             }
@@ -161,6 +163,8 @@ public class Playground extends ApplicationAdapter {
                 }
             }
         }
+
+        printGrid(gameGrid, "mines");
 
         checkForAdjacentMines();
     }
@@ -217,6 +221,8 @@ public class Playground extends ApplicationAdapter {
                 }
             }
         }
+
+        printGrid(gameGrid, "adjacent");
     }
 
     private void initializeGrid(Cell[][] grid) {
@@ -240,9 +246,25 @@ public class Playground extends ApplicationAdapter {
                 );
 
                 grid[row][column] = new Cell(index, actualCellBounds);
-                grid[row][column].cellValue = -2;
+                grid[row][column].cellValue = 0;
                 index++;
             }
+        }
+    }
+
+    private void printGrid(Cell[][] gameGrid, String message) {
+
+        System.out.println("grid " + message);
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                var actualValue = gameGrid[row][column].cellValue;
+                System.out.print(actualValue + ",");
+            }
+
+            System.out.println();
         }
     }
 
@@ -451,6 +473,7 @@ public class Playground extends ApplicationAdapter {
                 gameGrid[row][column].isFlagged = false;
                 gameGrid[row][column].isMined = false;
                 gameGrid[row][column].mineCounter = 0;
+                gameGrid[row][column].cellValue = 0;
             }
         }
     }
@@ -460,7 +483,10 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
-        var result = floodFill(gameGrid, selectedRow, selectedColumn, 0);
+        //need to avoid changing numbers with 0
+        var result = floodFill(gameGrid, selectedRow, selectedColumn, 10);
+
+        printGrid(result, "clean");
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
@@ -468,7 +494,7 @@ public class Playground extends ApplicationAdapter {
 
                 var actualCell = result[row][column];
 
-                if (actualCell.cellValue == 0) {
+                if (actualCell.cellValue == 10) {
 
 //                    if (selectedCellsIndexes.contains(actualCell.index, true))
                         selectedCellsIndexes.add(actualCell.index);

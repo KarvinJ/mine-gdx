@@ -58,8 +58,6 @@ public class Playground extends ApplicationAdapter {
 
         initializeGrid(gameGrid);
 
-        printGrid(gameGrid, "initialize");
-
         selectedCellsIndexes = new Array<>();
         adjacentToMinesCellsIndexes = new Array<>();
 
@@ -164,8 +162,6 @@ public class Playground extends ApplicationAdapter {
             }
         }
 
-        printGrid(gameGrid, "mines");
-
         checkForAdjacentMines();
     }
 
@@ -221,8 +217,6 @@ public class Playground extends ApplicationAdapter {
                 }
             }
         }
-
-        printGrid(gameGrid, "adjacent");
     }
 
     private void initializeGrid(Cell[][] grid) {
@@ -249,22 +243,6 @@ public class Playground extends ApplicationAdapter {
                 grid[row][column].cellValue = 0;
                 index++;
             }
-        }
-    }
-
-    private void printGrid(Cell[][] gameGrid, String message) {
-
-        System.out.println("grid " + message);
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                var actualValue = gameGrid[row][column].cellValue;
-                System.out.print(actualValue + ",");
-            }
-
-            System.out.println();
         }
     }
 
@@ -483,10 +461,7 @@ public class Playground extends ApplicationAdapter {
         if (selectedCell.isMined || selectedCell.mineCounter > 0)
             return;
 
-        //need to avoid changing numbers with 0
-        var result = floodFill(gameGrid, selectedRow, selectedColumn, 10);
-
-        printGrid(result, "clean");
+        var result = floodFill(gameGrid, selectedRow, selectedColumn);
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
@@ -494,46 +469,81 @@ public class Playground extends ApplicationAdapter {
 
                 var actualCell = result[row][column];
 
+                if (actualCell.isMined)
+                    continue;
+
                 if (actualCell.cellValue == 10) {
 
-//                    if (selectedCellsIndexes.contains(actualCell.index, true))
-                        selectedCellsIndexes.add(actualCell.index);
+                    selectedCellsIndexes.add(actualCell.index);
+
+                    for (var adjacentIndex :adjacentToMinesCellsIndexes) {
+
+                        var previousColumn = column - 1;
+                        var nextColumn = column + 1;
+
+                        var previousRow = row - 1;
+                        var nextRow = row + 1;
+
+                        if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[row][nextColumn].index);
+
+                        if (previousColumn >= 0 && gameGrid[row][previousColumn].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[row][previousColumn].index);
+
+                        if (previousRow >= 0 && gameGrid[previousRow][column].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[previousRow][column].index);
+
+                        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[nextRow][nextColumn].index);
+
+                        if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[nextRow][previousColumn].index);
+
+                        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[previousRow][nextColumn].index);
+
+                        if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].index == adjacentIndex)
+                            selectedCellsIndexes.add(gameGrid[previousRow][previousColumn].index);
+                    }
                 }
             }
         }
     }
 
-    // Main function to perform flood fill
-    Cell[][] floodFill(Cell[][] image, int sr, int sc, int newColor){
+    private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn){
+        
+        //default value to change.
+        final int newValue = 10;
 
         // If the starting pixel already has the new color, no need
         // to process
-        if (image[sr][sc].cellValue == newColor) {
+        if (image[selectedRow][selectedColumn].cellValue == newValue) {
             return image;
         }
 
         // Call DFS with the original color of the starting pixel
-        dfs(image, sr, sc, image[sr][sc].cellValue, newColor);
+        depthFirstSearch(image, selectedRow, selectedColumn, image[selectedRow][selectedColumn].cellValue, newValue);
 
         // Return the updated image
         return image;
     }
 
-    void dfs(Cell[][] image, int x, int y, int oldColor, int newColor){
+//    In Depth First Search (or DFS) for a graph, we traverse all adjacent vertices one by one.
+    void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue){
 
         // Base case: check for out-of-bound indices or mismatched color
-        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldColor) {
+        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue) {
             return; // Backtrack if invalid
         }
 
         // Change the color of the current pixel
-        image[x][y].cellValue = newColor;
+        image[x][y].cellValue = newValue;
 
         // Recursively call DFS in all four directions
-        dfs(image, x + 1, y, oldColor, newColor);
-        dfs(image, x - 1, y, oldColor, newColor);
-        dfs(image, x, y + 1, oldColor, newColor);
-        dfs(image, x, y - 1, oldColor, newColor);
+        depthFirstSearch(image, x + 1, y, oldValue, newValue);
+        depthFirstSearch(image, x - 1, y, oldValue, newValue);
+        depthFirstSearch(image, x, y + 1, oldValue, newValue);
+        depthFirstSearch(image, x, y - 1, oldValue, newValue);
     }
 
     @Override
@@ -542,6 +552,11 @@ public class Playground extends ApplicationAdapter {
         batch.dispose();
         shapeRenderer.dispose();
         font.dispose();
+        mineTexture.dispose();
+        explodedMineTexture.dispose();
+        smileyTexture.dispose();
+        emptyCellTexture.dispose();
+        flagTexture.dispose();
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 

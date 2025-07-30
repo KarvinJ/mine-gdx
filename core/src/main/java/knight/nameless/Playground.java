@@ -74,24 +74,16 @@ public class Playground extends ApplicationAdapter {
         smileyTexture = new Texture("img/TileSmiley.png");
 
         tileNumberTextures = new Array<>();
-        tileNumberTextures.add(
-            new Texture("img/Tile1.png"),
-            new Texture("img/Tile2.png"),
-            new Texture("img/Tile3.png"),
-            new Texture("img/Tile4.png")
-        );
 
-        tileNumberTextures.add(
-            new Texture("img/Tile5.png"),
-            new Texture("img/Tile6.png"),
-            new Texture("img/Tile7.png"),
-            new Texture("img/Tile8.png")
-        );
+        for (int i = 1; i < 9; i++) {
 
-        scoreNumbers = loadTextureSprite();
+            tileNumberTextures.add(new Texture("img/Tile" + i + ".png"));
+        }
+
+        scoreNumbers = loadNumbersTextureRegion();
     }
 
-    private TextureRegion[] loadTextureSprite() {
+    private TextureRegion[] loadNumbersTextureRegion() {
 
         Texture textureToSplit = new Texture("img/numbers.png");
 
@@ -453,7 +445,8 @@ public class Playground extends ApplicationAdapter {
                         font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
                     }
 
-                    if (adjacentToMinesCellsIndexes.contains(actualCell.index, true))
+                    //draw adjacent mines cells cell with value 1 to 8
+                    if (actualCell.cellValue > 0 && actualCell.cellValue < 9)
                         actualCell.draw(batch);
                 }
 
@@ -572,7 +565,7 @@ public class Playground extends ApplicationAdapter {
 
     private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
 
-        //I don't need to evaluate mine cells (9) and adjacent to mine cells
+        //I don't need to evaluate mine cells (9) and adjacent to mine cells, just the empty cells (0)
         if (selectedCell.cellValue > 0)
             return;
 
@@ -671,6 +664,11 @@ public class Playground extends ApplicationAdapter {
         emptyCellTexture.dispose();
         flagTexture.dispose();
         wrongFlagTexture.dispose();
+
+        for (var tileNumberTexture : tileNumberTextures)
+            tileNumberTexture.dispose();
+
+        tileNumberTextures.clear();
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 

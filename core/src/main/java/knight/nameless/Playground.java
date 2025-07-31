@@ -30,7 +30,6 @@ public class Playground extends ApplicationAdapter {
     private final int TOTAL_COLUMNS = 9;
     private boolean isGameOver = false;
     private Cell[][] gameGrid;
-    private Array<Integer> selectedCellsIndexes;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
     private Texture explodedMineTexture;
@@ -60,7 +59,6 @@ public class Playground extends ApplicationAdapter {
 
         initializeGrid(gameGrid);
 
-        selectedCellsIndexes = new Array<>();
         adjacentToMinesCellsIndexes = new Array<>();
 
         mineCellsIndexes = new Array<>();
@@ -105,9 +103,7 @@ public class Playground extends ApplicationAdapter {
             batch.draw(scoreNumbers[9], positionX, positionY, width, height);
             batch.draw(scoreNumbers[9], positionX + spaceBetweenNumbers, positionY, width, height);
             batch.draw(scoreNumbers[9], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-        }
-
-        else if (number < 10) {
+        } else if (number < 10) {
 
             batch.draw(scoreNumbers[0], positionX, positionY, width, height);
             batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
@@ -116,8 +112,7 @@ public class Playground extends ApplicationAdapter {
                 batch.draw(scoreNumbers[number], positionX + spaceBetweenNumbers * 2, positionY, width, height);
             else
                 batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-        }
-        else if (number < 100) {
+        } else if (number < 100) {
 
             int tens = number / 10;
             int units = number % 10;
@@ -125,8 +120,7 @@ public class Playground extends ApplicationAdapter {
             batch.draw(scoreNumbers[0], positionX, positionY, width, height);
             batch.draw(scoreNumbers[tens], positionX + spaceBetweenNumbers, positionY, width, height);
             batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-        }
-        else {
+        } else {
 
             int hundred = number / 100;
             int hundredUnits = number % 100;
@@ -137,8 +131,7 @@ public class Playground extends ApplicationAdapter {
 
                 batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers, positionY, width, height);
                 batch.draw(scoreNumbers[hundredUnits], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-            }
-            else {
+            } else {
 
                 int hundredTens = hundredUnits / 10;
                 int hundredUnits2 = hundredUnits % 10;
@@ -324,8 +317,6 @@ public class Playground extends ApplicationAdapter {
 
                 if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell.bounds)) {
 
-                    var isAlreadyOpen = selectedCellsIndexes.contains(actualCell.index, true);
-
                     if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
                         if (actualCell.isFlagged) {
@@ -337,12 +328,12 @@ public class Playground extends ApplicationAdapter {
                         if (mineCellsIndexes.size == 0)
                             initializeMineField(actualCell.index);
 
-                        if (!isAlreadyOpen) {
+                        if (!actualCell.isOpen) {
 
-                            selectedCellsIndexes.add(actualCell.index);
+                            actualCell.isOpen = true;
                             checkForCleanCells(actualCell, row, column);
                         }
-                    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !isAlreadyOpen)
+                    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !actualCell.isOpen)
                         actualCell.isFlagged = !actualCell.isFlagged;
                 }
             }
@@ -419,7 +410,7 @@ public class Playground extends ApplicationAdapter {
                     actualCell.bounds.height
                 );
 
-                if (selectedCellsIndexes.contains(actualCell.index, true)) {
+                if (actualCell.isOpen) {
 
                     batch.draw(
                         emptyCellTexture,
@@ -547,7 +538,6 @@ public class Playground extends ApplicationAdapter {
     private void resetGame() {
 
         isGameOver = false;
-        selectedCellsIndexes.clear();
         mineCellsIndexes.clear();
         adjacentToMinesCellsIndexes.clear();
         time = 0;
@@ -556,6 +546,7 @@ public class Playground extends ApplicationAdapter {
 
             for (int column = 0; column < TOTAL_COLUMNS; column++) {
 
+                gameGrid[row][column].isOpen = false;
                 gameGrid[row][column].isFlagged = false;
                 gameGrid[row][column].isMined = false;
                 gameGrid[row][column].cellValue = 0;
@@ -582,7 +573,7 @@ public class Playground extends ApplicationAdapter {
 
                 if (actualCell.cellValue == 10) {
 
-                    selectedCellsIndexes.add(actualCell.index);
+                    actualCell.isOpen = true;
 
                     for (var adjacentIndex : adjacentToMinesCellsIndexes) {
 
@@ -593,25 +584,25 @@ public class Playground extends ApplicationAdapter {
                         var nextRow = row + 1;
 
                         if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[row][nextColumn].index);
+                            gameGrid[row][nextColumn].isOpen = true;
 
                         if (previousColumn >= 0 && gameGrid[row][previousColumn].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[row][previousColumn].index);
+                            gameGrid[row][previousColumn].isOpen = true;
 
                         if (previousRow >= 0 && gameGrid[previousRow][column].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[previousRow][column].index);
+                            gameGrid[previousRow][column].isOpen = true;
 
                         if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[nextRow][nextColumn].index);
+                            gameGrid[nextRow][nextColumn].isOpen = true;
 
                         if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[nextRow][previousColumn].index);
+                            gameGrid[nextRow][previousColumn].isOpen = true;
 
                         if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[previousRow][nextColumn].index);
+                            gameGrid[previousRow][nextColumn].isOpen = true;
 
                         if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].index == adjacentIndex)
-                            selectedCellsIndexes.add(gameGrid[previousRow][previousColumn].index);
+                            gameGrid[previousRow][previousColumn].isOpen = true;
                     }
                 }
             }

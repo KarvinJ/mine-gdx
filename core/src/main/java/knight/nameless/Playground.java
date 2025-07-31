@@ -452,7 +452,6 @@ public class Playground extends ApplicationAdapter {
                         );
 
                         isGameOver = true;
-                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
                     }
 
                     //draw adjacent mines cells cell with value 1 to 8
@@ -493,6 +492,12 @@ public class Playground extends ApplicationAdapter {
                     }
 
                     renderGameOverFlags(flaggedCells, minedCells);
+
+                    if (youWin)
+                        font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
+                    else
+                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
+
                 } else {
 
                     for (var flaggedCell : flaggedCells) {
@@ -515,7 +520,6 @@ public class Playground extends ApplicationAdapter {
 
                     youWin = true;
                     isGameOver = true;
-                    font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
                 }
             }
         }

@@ -21,16 +21,18 @@ public class Playground extends ApplicationAdapter {
 
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 640;
+    private final int TOTAL_ROWS = 9;
+    private final int TOTAL_COLUMNS = 9;
+    private float time = 0;
+    private boolean isGameOver = false;
+    private boolean youWin = false;
+    private boolean shouldCheckForMines = true;
+    private Cell[][] gameGrid;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     public ExtendViewport viewport;
     public OrthographicCamera camera;
-    private final int TOTAL_ROWS = 9;
-    private final int TOTAL_COLUMNS = 9;
-    private boolean isGameOver = false;
-    private boolean youWin = false;
-    private Cell[][] gameGrid;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
     private Texture explodedMineTexture;
@@ -42,7 +44,6 @@ public class Playground extends ApplicationAdapter {
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
-    private float time = 0;
 
     @Override
     public void create() {
@@ -336,7 +337,7 @@ public class Playground extends ApplicationAdapter {
 
                 if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell.bounds)) {
 
-                    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || shouldCheckForMines) {
 
                         if (actualCell.isFlagged) {
 
@@ -352,7 +353,7 @@ public class Playground extends ApplicationAdapter {
                             actualCell.isOpen = true;
                             checkForCleanCells(actualCell, row, column);
                         }
-                    } else if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && !actualCell.isOpen)
+                    } else if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || !shouldCheckForMines) && !actualCell.isOpen)
                         actualCell.isFlagged = !actualCell.isFlagged;
                 }
             }
@@ -366,6 +367,10 @@ public class Playground extends ApplicationAdapter {
         var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
         var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
+        var stateBounds = new Rectangle(SCREEN_WIDTH - 25, SCREEN_HEIGHT - 125, 25, 25);
+
+        if (Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
+            shouldCheckForMines = !shouldCheckForMines;
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
             resetGame();
@@ -404,6 +409,14 @@ public class Playground extends ApplicationAdapter {
             time += Gdx.graphics.getDeltaTime();
 
         drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
+
+        batch.draw(
+            flagTexture,
+            stateBounds.x,
+            stateBounds.y,
+            stateBounds.width,
+            stateBounds.height
+        );
 
         batch.draw(
             smileyTexture,

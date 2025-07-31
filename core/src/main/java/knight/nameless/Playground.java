@@ -410,13 +410,26 @@ public class Playground extends ApplicationAdapter {
 
         drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
 
-        batch.draw(
-            flagTexture,
-            stateBounds.x,
-            stateBounds.y,
-            stateBounds.width,
-            stateBounds.height
-        );
+        if (shouldCheckForMines) {
+
+            batch.draw(
+                mineTexture,
+                stateBounds.x,
+                stateBounds.y,
+                stateBounds.width,
+                stateBounds.height
+            );
+        }
+        else {
+
+            batch.draw(
+                flagTexture,
+                stateBounds.x,
+                stateBounds.y,
+                stateBounds.width,
+                stateBounds.height
+            );
+        }
 
         batch.draw(
             smileyTexture,

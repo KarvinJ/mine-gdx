@@ -142,6 +142,24 @@ public class Playground extends ApplicationAdapter {
         }
     }
 
+    private Array<Cell> getOpenCells() {
+
+        var openCells = new Array<Cell>();
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                var actualCell = gameGrid[row][column];
+
+                if (actualCell.isOpen)
+                    openCells.add(actualCell);
+            }
+        }
+
+        return openCells;
+    }
+
     private Array<Cell> getFlaggedCells() {
 
         var flaggedCells = new Array<Cell>();
@@ -472,22 +490,11 @@ public class Playground extends ApplicationAdapter {
                     }
                 }
 
-                int foundMines = 0;
+                var totalOpenCells = getOpenCells().size + minedCells.size;
+                int gridSize = TOTAL_ROWS * TOTAL_COLUMNS;
 
-                for (var flaggedCell : flaggedCells) {
-
-                    for (var minedCell : minedCells) {
-
-                        if (flaggedCell.index == minedCell.index) {
-                            foundMines++;
-                            break;
-                        }
-                    }
-                }
-
-                //also player can win without revealing all cells. Need to fix both of these issues.
                 //for some reason sometimes there is only 9 mines instead of 10
-                if (!minedCells.isEmpty() && totalFlags == 0 && foundMines == minedCells.size) {
+                if (!minedCells.isEmpty() && totalOpenCells == gridSize) {
 
                     isGameOver = true;
                     font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);

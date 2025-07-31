@@ -568,7 +568,7 @@ public class Playground extends ApplicationAdapter {
 
                 var actualCell = result[row][column];
 
-                if (actualCell.isMined)
+                if (actualCell.isMined || actualCell.isOpen)
                     continue;
 
                 if (actualCell.cellValue == 10) {

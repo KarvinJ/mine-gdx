@@ -29,6 +29,7 @@ public class Playground extends ApplicationAdapter {
     private final int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
     private boolean isGameOver = false;
+    private boolean youWin = false;
     private Cell[][] gameGrid;
     private Array<Integer> adjacentToMinesCellsIndexes;
     private Array<Integer> mineCellsIndexes;
@@ -461,18 +462,34 @@ public class Playground extends ApplicationAdapter {
 
                 if (isGameOver) {
 
-                    for (var minedCell : getMinedCells()) {
+                    if (youWin) {
 
-                        if (minedCell.index == selectedMineIndex)
-                            continue;
+                        for (var minedCell : getMinedCells()) {
 
-                        batch.draw(
-                            mineTexture,
-                            minedCell.bounds.x,
-                            minedCell.bounds.y,
-                            minedCell.bounds.width,
-                            minedCell.bounds.height
-                        );
+                            batch.draw(
+                                flagTexture,
+                                minedCell.bounds.x,
+                                minedCell.bounds.y,
+                                minedCell.bounds.width,
+                                minedCell.bounds.height
+                            );
+                        }
+                    }
+                    else {
+
+                        for (var minedCell : getMinedCells()) {
+
+                            if (minedCell.index == selectedMineIndex)
+                                continue;
+
+                            batch.draw(
+                                mineTexture,
+                                minedCell.bounds.x,
+                                minedCell.bounds.y,
+                                minedCell.bounds.width,
+                                minedCell.bounds.height
+                            );
+                        }
                     }
 
                     renderGameOverFlags(flaggedCells, minedCells);
@@ -496,6 +513,7 @@ public class Playground extends ApplicationAdapter {
                 //for some reason sometimes there is only 9 mines instead of 10
                 if (!minedCells.isEmpty() && totalOpenCells == gridSize) {
 
+                    youWin = true;
                     isGameOver = true;
                     font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
                 }

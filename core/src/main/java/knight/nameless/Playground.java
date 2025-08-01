@@ -27,7 +27,7 @@ public class Playground extends ApplicationAdapter {
     private float time = 0;
     private boolean isGameOver = false;
     private boolean youWin = false;
-    private boolean shouldCheckForMines = false;
+    private boolean shouldCheckForMines = true;
     private boolean isHardMode = false;
     private Cell[][] gameGrid;
     private SpriteBatch batch;
@@ -338,7 +338,10 @@ public class Playground extends ApplicationAdapter {
 
                 if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell.bounds)) {
 
-                    if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || shouldCheckForMines) {
+                    if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (!Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && !shouldCheckForMines) ) && !actualCell.isOpen)
+                        actualCell.isFlagged = !actualCell.isFlagged;
+
+                    else if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || shouldCheckForMines) {
 
                         if (actualCell.isFlagged) {
 
@@ -354,8 +357,7 @@ public class Playground extends ApplicationAdapter {
                             actualCell.isOpen = true;
                             checkForCleanCells(actualCell, row, column);
                         }
-                    } else if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || !shouldCheckForMines) && !actualCell.isOpen)
-                        actualCell.isFlagged = !actualCell.isFlagged;
+                    }
                 }
             }
         }

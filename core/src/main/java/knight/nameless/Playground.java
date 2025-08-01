@@ -201,10 +201,12 @@ public class Playground extends ApplicationAdapter {
 
     private void initializeMineField(int firstSelectedIndex) {
 
-        int gridSize = TOTAL_ROWS * TOTAL_COLUMNS;
+        //grid size is 81, but the grid index is 80
+        int gridSize = TOTAL_ROWS * TOTAL_COLUMNS - 1;
 
         final int TOTAL_MINES = isHardMode ? 20 : 10;
-        for (int i = 0; i < TOTAL_MINES; i++) {
+        int addedMines = 0;
+        while (addedMines < TOTAL_MINES){
 
             var isAlreadyAdded = true;
 
@@ -214,11 +216,8 @@ public class Playground extends ApplicationAdapter {
 
                 isAlreadyAdded = mineCellsIndexes.contains(mineCellIndex, true);
 
-                if (!isAlreadyAdded) {
-
-                    //the mine cannot be in the first index selected by the player.
-                    if (mineCellIndex == firstSelectedIndex)
-                        mineCellIndex++;
+                //the mine cannot be in the first index selected by the player.
+                if (!isAlreadyAdded && mineCellIndex != firstSelectedIndex) {
 
                     mineCellsIndexes.add(mineCellIndex);
 
@@ -232,6 +231,7 @@ public class Playground extends ApplicationAdapter {
 
                                 actualCell.cellValue = 9;
                                 actualCell.isMined = true;
+                                addedMines++;
                                 break;
                             }
                         }

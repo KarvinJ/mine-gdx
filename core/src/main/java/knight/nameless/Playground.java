@@ -21,12 +21,13 @@ public class Playground extends ApplicationAdapter {
 
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 640;
-    private final int TOTAL_ROWS = 9;
+    private int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
     private float time = 0;
     private boolean isGameOver = false;
     private boolean youWin = false;
-    private boolean shouldCheckForMines = true;
+    private boolean shouldCheckForMines = false;
+    private boolean isHardMode = false;
     private Cell[][] gameGrid;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
@@ -202,7 +203,7 @@ public class Playground extends ApplicationAdapter {
 
         int gridSize = TOTAL_ROWS * TOTAL_COLUMNS;
 
-        final int TOTAL_MINES = 10;
+        final int TOTAL_MINES = isHardMode ? 20 : 10;
         for (int i = 0; i < TOTAL_MINES; i++) {
 
             var isAlreadyAdded = true;
@@ -301,7 +302,7 @@ public class Playground extends ApplicationAdapter {
 
         int horizontalOffset = 9;
         int cellSize = 45;
-        int verticalOffset = 100;
+        int verticalOffset = isHardMode ? 6 : 100;
         int cellOffset = 2;
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -366,15 +367,6 @@ public class Playground extends ApplicationAdapter {
         Vector3 worldCoordinates = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
         var mouseBounds = new Rectangle(worldCoordinates.x, worldCoordinates.y, 2, 2);
 
-        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
-        var stateBounds = new Rectangle(SCREEN_WIDTH - 25, SCREEN_HEIGHT - 125, 25, 25);
-
-        if (Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
-            shouldCheckForMines = !shouldCheckForMines;
-
-        if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
-            resetGame();
-
         if (!isGameOver)
             update(mouseBounds);
 
@@ -385,12 +377,15 @@ public class Playground extends ApplicationAdapter {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var backgroundBonds = new Rectangle(-2, 92, SCREEN_WIDTH + 2, 420);
+        var yValue = isHardMode ? 0 : 92;
+        var height = isHardMode ? 510 : 420;
+        var backgroundBounds = new Rectangle(-2, yValue, SCREEN_WIDTH + 2, height);
+
         shapeRenderer.rect(
-            backgroundBonds.x,
-            backgroundBonds.y,
-            backgroundBonds.width,
-            backgroundBonds.height
+            backgroundBounds.x,
+            backgroundBounds.y,
+            backgroundBounds.width,
+            backgroundBounds.height
         );
 
         shapeRenderer.end();
@@ -410,34 +405,7 @@ public class Playground extends ApplicationAdapter {
 
         drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
 
-        if (shouldCheckForMines) {
-
-            batch.draw(
-                mineTexture,
-                stateBounds.x,
-                stateBounds.y,
-                stateBounds.width,
-                stateBounds.height
-            );
-        }
-        else {
-
-            batch.draw(
-                flagTexture,
-                stateBounds.x,
-                stateBounds.y,
-                stateBounds.width,
-                stateBounds.height
-            );
-        }
-
-        batch.draw(
-            smileyTexture,
-            smileyBounds.x,
-            smileyBounds.y,
-            smileyBounds.width,
-            smileyBounds.height
-        );
+        manageUIElements(mouseBounds);
 
         int selectedMineIndex = 0;
 
@@ -553,6 +521,75 @@ public class Playground extends ApplicationAdapter {
         batch.end();
     }
 
+    private void manageUIElements(Rectangle mouseBounds) {
+
+        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
+        var stateBounds = new Rectangle(SCREEN_WIDTH - 25, SCREEN_HEIGHT - 125, 25, 25);
+        var difficultyBounds = new Rectangle( 0, SCREEN_HEIGHT - 125, 25, 25);
+
+        if (Gdx.input.justTouched() && mouseBounds.overlaps(difficultyBounds)) {
+
+            isHardMode = !isHardMode;
+            resetGame();
+        }
+
+        if (Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
+            shouldCheckForMines = !shouldCheckForMines;
+
+        if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
+            resetGame();
+
+        if (isHardMode) {
+
+            batch.draw(
+                tileNumberTextures.get(1),
+                difficultyBounds.x,
+                difficultyBounds.y,
+                difficultyBounds.width,
+                difficultyBounds.height
+            );
+        }
+        else {
+
+            batch.draw(
+                tileNumberTextures.get(0),
+                difficultyBounds.x,
+                difficultyBounds.y,
+                difficultyBounds.width,
+                difficultyBounds.height
+            );
+        }
+
+        if (shouldCheckForMines) {
+
+            batch.draw(
+                mineTexture,
+                stateBounds.x,
+                stateBounds.y,
+                stateBounds.width,
+                stateBounds.height
+            );
+        }
+        else {
+
+            batch.draw(
+                flagTexture,
+                stateBounds.x,
+                stateBounds.y,
+                stateBounds.width,
+                stateBounds.height
+            );
+        }
+
+        batch.draw(
+            smileyTexture,
+            smileyBounds.x,
+            smileyBounds.y,
+            smileyBounds.width,
+            smileyBounds.height
+        );
+    }
+
     private void renderGameOverFlags(Array<Cell> flaggedCells, Array<Cell> minedCells) {
 
         for (var flaggedCell : flaggedCells) {
@@ -592,21 +629,19 @@ public class Playground extends ApplicationAdapter {
 
     private void resetGame() {
 
+        youWin = false;
         isGameOver = false;
         mineCellsIndexes.clear();
         adjacentToMinesCellsIndexes.clear();
         time = 0;
 
-        for (int row = 0; row < TOTAL_ROWS; row++) {
+        if (isHardMode)
+            TOTAL_ROWS = 11;
+        else
+            TOTAL_ROWS = 9;
 
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                gameGrid[row][column].isOpen = false;
-                gameGrid[row][column].isFlagged = false;
-                gameGrid[row][column].isMined = false;
-                gameGrid[row][column].cellValue = 0;
-            }
-        }
+        gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
+        initializeGrid(gameGrid);
     }
 
     private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {

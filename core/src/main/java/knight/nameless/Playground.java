@@ -23,6 +23,7 @@ public class Playground extends ApplicationAdapter {
     public final int SCREEN_HEIGHT = 720;
     private int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
+    private int TOTAL_MINES = 10;
     private float time = 0;
     private boolean isGameOver = false;
     private boolean youWin = false;
@@ -204,9 +205,8 @@ public class Playground extends ApplicationAdapter {
         //grid size is 81, but the grid index is 80
         int gridSize = TOTAL_ROWS * TOTAL_COLUMNS - 1;
 
-        final int TOTAL_MINES = isHardMode ? 20 : 10;
         int addedMines = 0;
-        while (addedMines < TOTAL_MINES){
+        while (addedMines < TOTAL_MINES) {
 
             var isAlreadyAdded = true;
 
@@ -396,16 +396,7 @@ public class Playground extends ApplicationAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        int totalFlags = minedCells.size - flaggedCells.size;
-
-        drawNumbers(batch, totalFlags, 40);
-
-        if (!isGameOver && !mineCellsIndexes.isEmpty())
-            time += Gdx.graphics.getDeltaTime();
-
-        drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
-
-        manageUIElements(mouseBounds);
+        manageUIElements(mouseBounds, flaggedCells.size);
 
         int selectedMineIndex = 0;
 
@@ -457,7 +448,7 @@ public class Playground extends ApplicationAdapter {
 
                     if (youWin) {
 
-                        for (var minedCell : getMinedCells()) {
+                        for (var minedCell : minedCells) {
 
                             batch.draw(
                                 flagTexture,
@@ -467,10 +458,9 @@ public class Playground extends ApplicationAdapter {
                                 minedCell.bounds.height
                             );
                         }
-                    }
-                    else {
+                    } else {
 
-                        for (var minedCell : getMinedCells()) {
+                        for (var minedCell : minedCells) {
 
                             if (minedCell.index == selectedMineIndex)
                                 continue;
@@ -506,10 +496,9 @@ public class Playground extends ApplicationAdapter {
                     }
                 }
 
-                var totalOpenCells = getOpenCells().size + minedCells.size;
+                var totalOpenCells = getOpenCells().size + TOTAL_MINES;
                 int gridSize = TOTAL_ROWS * TOTAL_COLUMNS;
 
-                //for some reason sometimes there is only 9 mines instead of 10
                 if (!minedCells.isEmpty() && totalOpenCells == gridSize) {
 
                     youWin = true;
@@ -521,11 +510,20 @@ public class Playground extends ApplicationAdapter {
         batch.end();
     }
 
-    private void manageUIElements(Rectangle mouseBounds) {
+    private void manageUIElements(Rectangle mouseBounds, int totalFlaggedCells) {
+
+        int totalFlags = TOTAL_MINES - totalFlaggedCells;
+
+        drawNumbers(batch, totalFlags, 40);
+
+        if (!isGameOver && !mineCellsIndexes.isEmpty())
+            time += Gdx.graphics.getDeltaTime();
+
+        drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
 
         var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
         var stateBounds = new Rectangle(SCREEN_WIDTH - 35, SCREEN_HEIGHT - 125, 35, 35);
-        var difficultyBounds = new Rectangle( 0, SCREEN_HEIGHT - 125, 35, 35);
+        var difficultyBounds = new Rectangle(0, SCREEN_HEIGHT - 125, 35, 35);
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(difficultyBounds)) {
 
@@ -548,8 +546,7 @@ public class Playground extends ApplicationAdapter {
                 difficultyBounds.width,
                 difficultyBounds.height
             );
-        }
-        else {
+        } else {
 
             batch.draw(
                 tileNumberTextures.get(0),
@@ -569,8 +566,7 @@ public class Playground extends ApplicationAdapter {
                 stateBounds.width,
                 stateBounds.height
             );
-        }
-        else {
+        } else {
 
             batch.draw(
                 flagTexture,
@@ -635,10 +631,16 @@ public class Playground extends ApplicationAdapter {
         adjacentToMinesCellsIndexes.clear();
         time = 0;
 
-        if (isHardMode)
+        if (isHardMode) {
+
+            TOTAL_MINES = 20;
             TOTAL_ROWS = 13;
-        else
+        }
+        else {
+
+            TOTAL_MINES = 10;
             TOTAL_ROWS = 9;
+        }
 
         gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
         initializeGrid(gameGrid);

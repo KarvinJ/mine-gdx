@@ -524,8 +524,8 @@ public class Playground extends ApplicationAdapter {
     private void manageUIElements(Rectangle mouseBounds) {
 
         var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
-        var stateBounds = new Rectangle(SCREEN_WIDTH - 25, SCREEN_HEIGHT - 125, 25, 25);
-        var difficultyBounds = new Rectangle( 0, SCREEN_HEIGHT - 125, 25, 25);
+        var stateBounds = new Rectangle(SCREEN_WIDTH - 35, SCREEN_HEIGHT - 125, 35, 35);
+        var difficultyBounds = new Rectangle( 0, SCREEN_HEIGHT - 125, 35, 35);
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(difficultyBounds)) {
 

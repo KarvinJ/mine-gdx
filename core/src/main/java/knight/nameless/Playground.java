@@ -20,7 +20,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 public class Playground extends ApplicationAdapter {
 
     public final int SCREEN_WIDTH = 420;
-    public final int SCREEN_HEIGHT = 640;
+    public final int SCREEN_HEIGHT = 720;
     private int TOTAL_ROWS = 9;
     private final int TOTAL_COLUMNS = 9;
     private float time = 0;
@@ -302,7 +302,7 @@ public class Playground extends ApplicationAdapter {
 
         int horizontalOffset = 9;
         int cellSize = 45;
-        int verticalOffset = isHardMode ? 6 : 100;
+        int verticalOffset = isHardMode ? 2 : 180;
         int cellOffset = 2;
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -377,8 +377,8 @@ public class Playground extends ApplicationAdapter {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var yValue = isHardMode ? 0 : 92;
-        var height = isHardMode ? 510 : 420;
+        var yValue = isHardMode ? 0 : 172;
+        var height = isHardMode ? 592 : 420;
         var backgroundBounds = new Rectangle(-2, yValue, SCREEN_WIDTH + 2, height);
 
         shapeRenderer.rect(
@@ -636,7 +636,7 @@ public class Playground extends ApplicationAdapter {
         time = 0;
 
         if (isHardMode)
-            TOTAL_ROWS = 11;
+            TOTAL_ROWS = 13;
         else
             TOTAL_ROWS = 9;
 

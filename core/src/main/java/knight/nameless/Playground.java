@@ -245,10 +245,66 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
             }
         }
 
-        checkForAdjacentMines();
+        setAdjacentToMinesCells();
     }
 
-    private void checkForAdjacentMines() {
+    private void checkAdjacentCellsToOpenByRowAndColumn(int row, int column) {
+
+        var previousColumn = column - 1;
+        var nextColumn = column + 1;
+
+        var previousRow = row - 1;
+        var nextRow = row + 1;
+
+        var adjacentCells = new Array<Cell>();
+
+        if (nextColumn < TOTAL_COLUMNS)
+            adjacentCells.add(gameGrid[row][nextColumn]);
+
+        if (previousColumn >= 0)
+            adjacentCells.add(gameGrid[row][previousColumn]);
+
+        if (previousRow >= 0)
+            adjacentCells.add(gameGrid[previousRow][column]);
+
+        if (nextRow < TOTAL_ROWS)
+            adjacentCells.add(gameGrid[nextRow][column]);
+
+        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS)
+            adjacentCells.add(gameGrid[nextRow][nextColumn]);
+
+        if (nextRow < TOTAL_ROWS && previousColumn >= 0)
+            adjacentCells.add(gameGrid[nextRow][previousColumn]);
+
+        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS)
+            adjacentCells.add(gameGrid[previousRow][nextColumn]);
+
+        if (previousRow >= 0 && previousColumn >= 0)
+            adjacentCells.add(gameGrid[previousRow][previousColumn]);
+
+        boolean hasAnyPendingMines = false;
+        for (var adjacentCell : adjacentCells) {
+
+            if (adjacentCell.isMined && !adjacentCell.isFlagged) {
+                hasAnyPendingMines = true;
+                break;
+            }
+        }
+
+        if (!hasAnyPendingMines) {
+
+            for (var adjacentCell : adjacentCells) {
+
+                if (adjacentCell.isMined)
+                    continue;
+
+                adjacentCell.isOpen = true;
+            }
+        }
+    }
+
+
+    private void setAdjacentToMinesCells() {
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
 
@@ -355,9 +411,10 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
                         if (!actualCell.isOpen)
                             actualCell.isFlagged = !actualCell.isFlagged;
-                    }
+                    } else if (touchRelease) {
 
-                    else if (touchRelease) {
+                        if (actualCell.isOpen)
+                            checkAdjacentCellsToOpenByRowAndColumn(row, column);
 
                         if (actualCell.isFlagged) {
 
@@ -668,8 +725,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
             TOTAL_MINES = 20;
             TOTAL_ROWS = 13;
-        }
-        else {
+        } else {
 
             TOTAL_MINES = 10;
             TOTAL_ROWS = 9;

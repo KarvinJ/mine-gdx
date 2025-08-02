@@ -353,6 +353,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         if (actualCell.isFlagged) {
 
                             actualCell.isFlagged = false;
+                            touchRelease = false;
                             break;
                         }
 
@@ -424,6 +425,17 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                     actualCell.bounds.width,
                     actualCell.bounds.height
                 );
+
+                if (mouseBounds.overlaps(actualCell.bounds)) {
+
+                    batch.draw(
+                        emptyCellTexture,
+                        actualCell.bounds.x,
+                        actualCell.bounds.y,
+                        actualCell.bounds.width,
+                        actualCell.bounds.height
+                    );
+                }
 
                 if (actualCell.isOpen) {
 

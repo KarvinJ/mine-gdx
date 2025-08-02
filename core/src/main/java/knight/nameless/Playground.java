@@ -3,6 +3,7 @@ package knight.nameless;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,7 +18,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-public class Playground extends ApplicationAdapter {
+public class Playground extends ApplicationAdapter implements InputProcessor {
 
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 720;
@@ -46,6 +47,7 @@ public class Playground extends ApplicationAdapter {
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
+    private boolean touchRelease = false;
 
     @Override
     public void create() {
@@ -83,6 +85,8 @@ public class Playground extends ApplicationAdapter {
         }
 
         scoreNumbers = loadNumbersTextureRegion();
+
+        Gdx.input.setInputProcessor(this);
     }
 
     private TextureRegion[] loadNumbersTextureRegion() {
@@ -336,12 +340,15 @@ public class Playground extends ApplicationAdapter {
 
                 var actualCell = gameGrid[row][column];
 
-                if (Gdx.input.justTouched() && mouseBounds.overlaps(actualCell.bounds)) {
+                if (mouseBounds.overlaps(actualCell.bounds)) {
 
-                    if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (!Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && !shouldCheckForMines) ) && !actualCell.isOpen)
-                        actualCell.isFlagged = !actualCell.isFlagged;
+                    if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (Gdx.input.justTouched() && !shouldCheckForMines))) {
 
-                    else if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || shouldCheckForMines) {
+                        if (!actualCell.isOpen)
+                            actualCell.isFlagged = !actualCell.isFlagged;
+                    }
+
+                    else if (touchRelease) {
 
                         if (actualCell.isFlagged) {
 
@@ -357,6 +364,8 @@ public class Playground extends ApplicationAdapter {
                             actualCell.isOpen = true;
                             checkForCleanCells(actualCell, row, column);
                         }
+
+                        touchRelease = false;
                     }
                 }
             }
@@ -761,5 +770,59 @@ public class Playground extends ApplicationAdapter {
                 gameGrid[row][column].dispose();
             }
         }
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+        touchRelease = false;
+
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+        touchRelease = button == Input.Buttons.LEFT && shouldCheckForMines;
+
+        return false;
+    }
+
+    @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        return false;
+    }
+
+    //this metho always have the mouse position
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(float amountX, float amountY) {
+        return false;
     }
 }

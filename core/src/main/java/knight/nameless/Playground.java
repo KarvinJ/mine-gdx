@@ -48,6 +48,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
     private boolean touchRelease = false;
+    private boolean theGameHasBeenReset = false;
 
     @Override
     public void create() {
@@ -341,6 +342,14 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                 var actualCell = gameGrid[row][column];
 
                 if (mouseBounds.overlaps(actualCell.bounds)) {
+
+                    //need to do this to avoid the bug
+                    if (theGameHasBeenReset) {
+
+                        theGameHasBeenReset = false;
+                        touchRelease = false;
+                        return;
+                    }
 
                     if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (Gdx.input.justTouched() && !shouldCheckForMines))) {
 
@@ -648,6 +657,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
     private void resetGame() {
 
+        theGameHasBeenReset = true;
         youWin = false;
         isGameOver = false;
         mineCellsIndexes.clear();

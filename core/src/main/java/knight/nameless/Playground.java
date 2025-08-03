@@ -106,7 +106,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         int horizontalOffset = isHardMode ? 5 : 9;
         int cellSize = isHardMode ? 41 : 45;
-        int verticalOffset = isHardMode ? 8 : 180;
+        int verticalOffset = isHardMode ? 0 : 210;
         int cellOffset = 2;
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -131,7 +131,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         final float width = 48;
         final float height = 64;
-        final float positionY = SCREEN_HEIGHT - 90;
+        final float positionY = SCREEN_HEIGHT - 70;
         var spaceBetweenNumbers = scoreNumbers[0].getRegionWidth() * 2 - 10;
 
         if (number > 999) {
@@ -454,8 +454,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var yValue = isHardMode ? 0 : 172;
-        var height = isHardMode ? 592 : 420;
+        var yValue = isHardMode ? 0 : 202;
+        var height = isHardMode ? 620 : 420;
         var backgroundBounds = new Rectangle(-2, yValue, SCREEN_WIDTH + 2, height);
 
         shapeRenderer.rect(
@@ -566,9 +566,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                     renderGameOverFlags(flaggedCells, minedCells);
 
                     if (youWin)
-                        font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
+                        font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
                     else
-                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 20);
+                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
 
                 } else {
 
@@ -609,9 +609,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
 
-        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 50 / 2f, SCREEN_HEIGHT - 85, 50, 50);
-        var stateBounds = new Rectangle(SCREEN_WIDTH - 35, SCREEN_HEIGHT - 125, 35, 35);
-        var difficultyBounds = new Rectangle(0, SCREEN_HEIGHT - 125, 35, 35);
+        var smileyBounds = new Rectangle(SCREEN_WIDTH / 2f - 45 / 2f, SCREEN_HEIGHT - 60, 45, 45);
+        var stateBounds = new Rectangle(SCREEN_WIDTH - 35, SCREEN_HEIGHT - 35, 35, 35);
+        var difficultyBounds = new Rectangle(0, SCREEN_HEIGHT - 35, 35, 35);
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(difficultyBounds)) {
 
@@ -723,7 +723,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         if (isHardMode) {
 
             TOTAL_MINES = 20;
-            TOTAL_ROWS = 14;
+            TOTAL_ROWS = 15;
             TOTAL_COLUMNS = 10;
         } else {
 

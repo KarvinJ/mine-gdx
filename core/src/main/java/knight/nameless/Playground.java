@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -23,22 +22,16 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 720;
-    private int TOTAL_ROWS = 9;
-    private int TOTAL_COLUMNS = 9;
-    private int TOTAL_MINES = 10;
     private float time = 0;
     private boolean isGameOver = false;
     private boolean youWin = false;
     private boolean shouldCheckForMines = true;
-    private boolean isHardMode = false;
-    private Cell[][] gameGrid;
+    private MineSweeper mineSweeper;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     public ExtendViewport viewport;
     public OrthographicCamera camera;
-    private Array<Integer> adjacentToMinesCellsIndexes;
-    private Array<Integer> mineCellsIndexes;
     private Texture explodedMineTexture;
     private Texture mineTexture;
     private Texture emptyCellTexture;
@@ -46,7 +39,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     private Texture flagTexture;
     private Texture wrongFlagTexture;
     private Texture smileyTexture;
-    private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
     private Sound boomSound;
     private Sound clickSound;
@@ -66,13 +58,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
 
-        gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
-
-        initializeGrid(gameGrid);
-
-        adjacentToMinesCellsIndexes = new Array<>();
-
-        mineCellsIndexes = new Array<>();
+        mineSweeper = new MineSweeper();
 
         unknownCellTexture = new Texture("img/TileUnknown.png");
         emptyCellTexture = new Texture("img/TileEmpty.png");
@@ -81,13 +67,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         flagTexture = new Texture("img/TileFlag.png");
         wrongFlagTexture = new Texture("img/TileFlagWrong.png");
         smileyTexture = new Texture("img/TileSmiley.png");
-
-        tileNumberTextures = new Array<>();
-
-        for (int i = 1; i < 9; i++) {
-
-            tileNumberTextures.add(new Texture("img/Tile" + i + ".png"));
-        }
 
         scoreNumbers = loadNumbersTextureRegion();
 
@@ -107,34 +86,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
             textureToSplit.getHeight()
         )[0];
     }
-
-    private void initializeGrid(Cell[][] grid) {
-
-        int index = 0;
-
-        int horizontalOffset = isHardMode ? 2 : 9;
-        int cellSize = isHardMode ? 38 : 45;
-        int verticalOffset = isHardMode ? 10 : 220;
-        int cellOffset = 2;
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                Rectangle actualCellBounds = new Rectangle(
-                    column * cellSize + horizontalOffset,
-                    row * cellSize + verticalOffset,
-                    cellSize - cellOffset,
-                    cellSize - cellOffset
-                );
-
-                grid[row][column] = new Cell(index, actualCellBounds);
-                grid[row][column].cellValue = 0;
-                index++;
-            }
-        }
-    }
-
     private void drawNumbers(SpriteBatch batch, int number, float positionX) {
 
         final float width = 48;
@@ -186,102 +137,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    private Array<Cell> getOpenCells() {
-
-        var openCells = new Array<Cell>();
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isOpen)
-                    openCells.add(actualCell);
-            }
-        }
-
-        return openCells;
-    }
-
-    private Array<Cell> getFlaggedCells() {
-
-        var flaggedCells = new Array<Cell>();
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isFlagged)
-                    flaggedCells.add(actualCell);
-            }
-        }
-
-        return flaggedCells;
-    }
-
-    private Array<Cell> getMinedCells() {
-
-        var minedCells = new Array<Cell>();
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isMined)
-                    minedCells.add(actualCell);
-            }
-        }
-
-        return minedCells;
-    }
-
-    private void initializeMineField(int firstSelectedIndex) {
-
-        int gridSize = TOTAL_ROWS * TOTAL_COLUMNS - 1;
-
-        int addedMines = 0;
-        while (addedMines < TOTAL_MINES) {
-
-            var isAlreadyAdded = true;
-
-            while (isAlreadyAdded) {
-
-                int mineCellIndex = MathUtils.random(0, gridSize);
-
-                isAlreadyAdded = mineCellsIndexes.contains(mineCellIndex, true);
-
-                //the mine cannot be in the first index selected by the player.
-                if (!isAlreadyAdded && mineCellIndex != firstSelectedIndex) {
-
-                    mineCellsIndexes.add(mineCellIndex);
-
-                    for (int row = 0; row < TOTAL_ROWS; row++) {
-
-                        for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                            var actualCell = gameGrid[row][column];
-
-                            if (actualCell.index == mineCellIndex) {
-
-                                actualCell.cellValue = 9;
-                                actualCell.isMined = true;
-                                addedMines++;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        setAdjacentToMinesCells();
-    }
-
     private void checkAdjacentCellsToOpenByRowAndColumn(int row, int column) {
 
         var previousColumn = column - 1;
@@ -292,29 +147,29 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         var adjacentCells = new Array<Cell>();
 
-        if (nextColumn < TOTAL_COLUMNS)
-            adjacentCells.add(gameGrid[row][nextColumn]);
+        if (nextColumn < mineSweeper.totalColumns)
+            adjacentCells.add(mineSweeper.gameGrid[row][nextColumn]);
 
         if (previousColumn >= 0)
-            adjacentCells.add(gameGrid[row][previousColumn]);
+            adjacentCells.add(mineSweeper.gameGrid[row][previousColumn]);
 
         if (previousRow >= 0)
-            adjacentCells.add(gameGrid[previousRow][column]);
+            adjacentCells.add(mineSweeper.gameGrid[previousRow][column]);
 
-        if (nextRow < TOTAL_ROWS)
-            adjacentCells.add(gameGrid[nextRow][column]);
+        if (nextRow < mineSweeper.totalRows)
+            adjacentCells.add(mineSweeper.gameGrid[nextRow][column]);
 
-        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS)
-            adjacentCells.add(gameGrid[nextRow][nextColumn]);
+        if (nextRow < mineSweeper.totalRows && nextColumn < mineSweeper.totalColumns)
+            adjacentCells.add(mineSweeper.gameGrid[nextRow][nextColumn]);
 
-        if (nextRow < TOTAL_ROWS && previousColumn >= 0)
-            adjacentCells.add(gameGrid[nextRow][previousColumn]);
+        if (nextRow < mineSweeper.totalRows && previousColumn >= 0)
+            adjacentCells.add(mineSweeper.gameGrid[nextRow][previousColumn]);
 
-        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS)
-            adjacentCells.add(gameGrid[previousRow][nextColumn]);
+        if (previousRow >= 0 && nextColumn < mineSweeper.totalColumns)
+            adjacentCells.add(mineSweeper.gameGrid[previousRow][nextColumn]);
 
         if (previousRow >= 0 && previousColumn >= 0)
-            adjacentCells.add(gameGrid[previousRow][previousColumn]);
+            adjacentCells.add(mineSweeper.gameGrid[previousRow][previousColumn]);
 
         boolean hasAnyPendingMines = false;
         for (var adjacentCell : adjacentCells) {
@@ -337,58 +192,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    private void setAdjacentToMinesCells() {
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                var actualCell = gameGrid[row][column];
-
-                if (actualCell.isMined)
-                    continue;
-
-                var previousColumn = column - 1;
-                var nextColumn = column + 1;
-
-                var previousRow = row - 1;
-                var nextRow = row + 1;
-
-                int mineCounter = 0;
-
-                if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].isMined)
-                    mineCounter++;
-
-                if (previousColumn >= 0 && gameGrid[row][previousColumn].isMined)
-                    mineCounter++;
-
-                if (previousRow >= 0 && gameGrid[previousRow][column].isMined)
-                    mineCounter++;
-
-                if (nextRow < TOTAL_ROWS && gameGrid[nextRow][column].isMined)
-                    mineCounter++;
-
-                if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].isMined)
-                    mineCounter++;
-
-                if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].isMined)
-                    mineCounter++;
-
-                if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].isMined)
-                    mineCounter++;
-
-                if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].isMined)
-                    mineCounter++;
-
-                if (mineCounter > 0) {
-
-                    actualCell.cellValue = mineCounter;
-                    actualCell.sprite = tileNumberTextures.get(mineCounter - 1);
-                    adjacentToMinesCellsIndexes.add(actualCell.index);
-                }
-            }
-        }
-    }
 
     @Override
     public void resize(int width, int height) {
@@ -397,11 +200,11 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
     private void update(Rectangle mouseBounds) {
 
-        for (int row = 0; row < TOTAL_ROWS; row++) {
+        for (int row = 0; row < mineSweeper.totalRows; row++) {
 
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+            for (int column = 0; column < mineSweeper.totalColumns; column++) {
 
-                var actualCell = gameGrid[row][column];
+                var actualCell = mineSweeper.gameGrid[row][column];
 
                 if (mouseBounds.overlaps(actualCell.bounds)) {
 
@@ -434,8 +237,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                             break;
                         }
 
-                        if (mineCellsIndexes.size == 0)
-                            initializeMineField(actualCell.index);
+                        if (mineSweeper.mineCellsIndexes.size == 0)
+                            mineSweeper.initializeMineField(actualCell.index);
 
                         if (!actualCell.isOpen) {
 
@@ -469,8 +272,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var yValue = isHardMode ? 0 : 212;
-        var height = isHardMode ? 628 : 420;
+        var yValue = mineSweeper.isHardMode ? 0 : 212;
+        var height = mineSweeper.isHardMode ? 628 : 420;
         var backgroundBounds = new Rectangle(-2, yValue, SCREEN_WIDTH + 2, height);
 
         shapeRenderer.rect(
@@ -482,21 +285,21 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         shapeRenderer.end();
 
-        var flaggedCells = getFlaggedCells();
-        var minedCells = getMinedCells();
+        var flaggedCells = mineSweeper.getFlaggedCells();
+        var minedCells = mineSweeper.getMinedCells();
 
         batch.setProjectionMatrix(viewport.getCamera().combined);
         batch.begin();
 
-        manageUIElements(mouseBounds, flaggedCells.size);
+        manageUIElements(mouseBounds, flaggedCells.size, minedCells.size);
 
         int selectedMineIndex = 0;
 
-        for (int row = 0; row < TOTAL_ROWS; row++) {
+        for (int row = 0; row < mineSweeper.totalRows; row++) {
 
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+            for (int column = 0; column < mineSweeper.totalColumns; column++) {
 
-                var actualCell = gameGrid[row][column];
+                var actualCell = mineSweeper.gameGrid[row][column];
 
                 batch.draw(
                     unknownCellTexture,
@@ -599,8 +402,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                     }
                 }
 
-                var totalOpenCells = getOpenCells().size + TOTAL_MINES;
-                int gridSize = TOTAL_ROWS * TOTAL_COLUMNS;
+                var totalOpenCells = mineSweeper.getOpenCells().size + mineSweeper.getMinedCells().size;
+                int gridSize = mineSweeper.totalRows * mineSweeper.totalColumns;
 
                 if (!minedCells.isEmpty() && totalOpenCells == gridSize) {
 
@@ -613,13 +416,13 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         batch.end();
     }
 
-    private void manageUIElements(Rectangle mouseBounds, int totalFlaggedCells) {
+    private void manageUIElements(Rectangle mouseBounds, int totalFlaggedCells, int totalMines) {
 
-        int totalFlags = TOTAL_MINES - totalFlaggedCells;
+        int totalFlags = totalMines - totalFlaggedCells;
 
         drawNumbers(batch, totalFlags, 40);
 
-        if (!isGameOver && !mineCellsIndexes.isEmpty())
+        if (!isGameOver && !mineSweeper.mineCellsIndexes.isEmpty())
             time += Gdx.graphics.getDeltaTime();
 
         drawNumbers(batch, (int) time, SCREEN_WIDTH - 150);
@@ -630,7 +433,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(difficultyBounds)) {
 
-            isHardMode = !isHardMode;
+            mineSweeper.isHardMode = !mineSweeper.isHardMode;
             resetGame();
         }
 
@@ -640,10 +443,10 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
             resetGame();
 
-        if (isHardMode) {
+        if (mineSweeper.isHardMode) {
 
             batch.draw(
-                tileNumberTextures.get(1),
+                mineSweeper.tileNumberTextures.get(1),
                 difficultyBounds.x,
                 difficultyBounds.y,
                 difficultyBounds.width,
@@ -652,7 +455,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         } else {
 
             batch.draw(
-                tileNumberTextures.get(0),
+                mineSweeper.tileNumberTextures.get(0),
                 difficultyBounds.x,
                 difficultyBounds.y,
                 difficultyBounds.width,
@@ -731,24 +534,24 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         theGameHasBeenReset = true;
         youWin = false;
         isGameOver = false;
-        mineCellsIndexes.clear();
-        adjacentToMinesCellsIndexes.clear();
+        mineSweeper.mineCellsIndexes.clear();
+        mineSweeper.adjacentToMinesCellsIndexes.clear();
         time = 0;
 
-        if (isHardMode) {
+        if (mineSweeper.isHardMode) {
 
-            TOTAL_MINES = 27;
-            TOTAL_ROWS = 16;
-            TOTAL_COLUMNS = 11;
+            mineSweeper.totalMines = 27;
+            mineSweeper.totalRows = 16;
+            mineSweeper.totalColumns = 11;
         } else {
 
-            TOTAL_MINES = 10;
-            TOTAL_ROWS = 9;
-            TOTAL_COLUMNS = 9;
+            mineSweeper.totalMines = 10;
+            mineSweeper.totalRows = 9;
+            mineSweeper.totalColumns = 9;
         }
 
-        gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];
-        initializeGrid(gameGrid);
+        mineSweeper.gameGrid = new Cell[mineSweeper.totalRows][mineSweeper.totalColumns];
+        mineSweeper.initializeGrid(mineSweeper.gameGrid);
     }
 
     private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
@@ -757,11 +560,11 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         if (selectedCell.cellValue > 0)
             return;
 
-        var result = floodFill(gameGrid, selectedRow, selectedColumn);
+        var result = floodFill(mineSweeper.gameGrid, selectedRow, selectedColumn);
 
-        for (int row = 0; row < TOTAL_ROWS; row++) {
+        for (int row = 0; row < mineSweeper.totalRows; row++) {
 
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+            for (int column = 0; column < mineSweeper.totalColumns; column++) {
 
                 var actualCell = result[row][column];
 
@@ -772,7 +575,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
                     actualCell.isOpen = true;
 
-                    for (var adjacentIndex : adjacentToMinesCellsIndexes) {
+                    for (var adjacentIndex : mineSweeper.adjacentToMinesCellsIndexes) {
 
                         var previousColumn = column - 1;
                         var nextColumn = column + 1;
@@ -780,26 +583,26 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         var previousRow = row - 1;
                         var nextRow = row + 1;
 
-                        if (nextColumn < TOTAL_COLUMNS && gameGrid[row][nextColumn].index == adjacentIndex)
-                            gameGrid[row][nextColumn].isOpen = true;
+                        if (nextColumn < mineSweeper.totalColumns && mineSweeper.gameGrid[row][nextColumn].index == adjacentIndex)
+                            mineSweeper.gameGrid[row][nextColumn].isOpen = true;
 
-                        if (previousColumn >= 0 && gameGrid[row][previousColumn].index == adjacentIndex)
-                            gameGrid[row][previousColumn].isOpen = true;
+                        if (previousColumn >= 0 && mineSweeper.gameGrid[row][previousColumn].index == adjacentIndex)
+                            mineSweeper.gameGrid[row][previousColumn].isOpen = true;
 
-                        if (previousRow >= 0 && gameGrid[previousRow][column].index == adjacentIndex)
-                            gameGrid[previousRow][column].isOpen = true;
+                        if (previousRow >= 0 && mineSweeper.gameGrid[previousRow][column].index == adjacentIndex)
+                            mineSweeper.gameGrid[previousRow][column].isOpen = true;
 
-                        if (nextRow < TOTAL_ROWS && nextColumn < TOTAL_COLUMNS && gameGrid[nextRow][nextColumn].index == adjacentIndex)
-                            gameGrid[nextRow][nextColumn].isOpen = true;
+                        if (nextRow < mineSweeper.totalRows && nextColumn < mineSweeper.totalColumns && mineSweeper.gameGrid[nextRow][nextColumn].index == adjacentIndex)
+                            mineSweeper.gameGrid[nextRow][nextColumn].isOpen = true;
 
-                        if (nextRow < TOTAL_ROWS && previousColumn >= 0 && gameGrid[nextRow][previousColumn].index == adjacentIndex)
-                            gameGrid[nextRow][previousColumn].isOpen = true;
+                        if (nextRow < mineSweeper.totalRows && previousColumn >= 0 && mineSweeper.gameGrid[nextRow][previousColumn].index == adjacentIndex)
+                            mineSweeper.gameGrid[nextRow][previousColumn].isOpen = true;
 
-                        if (previousRow >= 0 && nextColumn < TOTAL_COLUMNS && gameGrid[previousRow][nextColumn].index == adjacentIndex)
-                            gameGrid[previousRow][nextColumn].isOpen = true;
+                        if (previousRow >= 0 && nextColumn < mineSweeper.totalColumns && mineSweeper.gameGrid[previousRow][nextColumn].index == adjacentIndex)
+                            mineSweeper.gameGrid[previousRow][nextColumn].isOpen = true;
 
-                        if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].index == adjacentIndex)
-                            gameGrid[previousRow][previousColumn].isOpen = true;
+                        if (previousRow >= 0 && previousColumn >= 0 && mineSweeper.gameGrid[previousRow][previousColumn].index == adjacentIndex)
+                            mineSweeper.gameGrid[previousRow][previousColumn].isOpen = true;
                     }
                 }
             }
@@ -856,17 +659,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         clickSound.dispose();
         boomSound.dispose();
 
-        for (var tileNumberTexture : tileNumberTextures)
-            tileNumberTexture.dispose();
-
-        tileNumberTextures.clear();
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-                gameGrid[row][column].dispose();
-            }
-        }
+        mineSweeper.dispose();
     }
 
     @Override

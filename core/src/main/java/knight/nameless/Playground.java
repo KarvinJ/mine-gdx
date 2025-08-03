@@ -104,8 +104,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         int index = 0;
 
-        int horizontalOffset = isHardMode ? 5 : 9;
-        int cellSize = isHardMode ? 41 : 45;
+        int horizontalOffset = isHardMode ? 2 : 9;
+        int cellSize = isHardMode ? 38 : 45;
         int verticalOffset = isHardMode ? 10 : 220;
         int cellOffset = 2;
 
@@ -234,7 +234,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
     private void initializeMineField(int firstSelectedIndex) {
 
-        //grid size is 81, but the grid index is 80
         int gridSize = TOTAL_ROWS * TOTAL_COLUMNS - 1;
 
         int addedMines = 0;
@@ -455,7 +454,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         shapeRenderer.setColor(Color.DARK_GRAY);
 
         var yValue = isHardMode ? 0 : 212;
-        var height = isHardMode ? 630 : 420;
+        var height = isHardMode ? 628 : 420;
         var backgroundBounds = new Rectangle(-2, yValue, SCREEN_WIDTH + 2, height);
 
         shapeRenderer.rect(
@@ -566,9 +565,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                     renderGameOverFlags(flaggedCells, minedCells);
 
                     if (youWin)
-                        font.draw(batch, "You Won", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
+                        font.draw(batch, "You Win", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
                     else
-                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
+                        font.draw(batch, "You Lost", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
 
                 } else {
 
@@ -722,9 +721,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         if (isHardMode) {
 
-            TOTAL_MINES = 20;
-            TOTAL_ROWS = 15;
-            TOTAL_COLUMNS = 10;
+            TOTAL_MINES = 27;
+            TOTAL_ROWS = 16;
+            TOTAL_COLUMNS = 11;
         } else {
 
             TOTAL_MINES = 10;

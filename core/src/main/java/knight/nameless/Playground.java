@@ -51,7 +51,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         camera = new OrthographicCamera();
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
-
         viewport = new ExtendViewport(SCREEN_WIDTH, SCREEN_HEIGHT, camera);
 
         batch = new SpriteBatch();
@@ -75,6 +74,11 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         tapSound = Gdx.audio.newSound(Gdx.files.internal("sounds/tap.wav"));
 
         Gdx.input.setInputProcessor(this);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
     }
 
     private TextureRegion[] loadNumbersTextureRegion() {
@@ -137,67 +141,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-    private void checkAdjacentCellsToOpenByRowAndColumn(int row, int column) {
-
-        var previousColumn = column - 1;
-        var nextColumn = column + 1;
-
-        var previousRow = row - 1;
-        var nextRow = row + 1;
-
-        var adjacentCells = new Array<Cell>();
-
-        if (nextColumn < mineSweeper.totalColumns)
-            adjacentCells.add(mineSweeper.gameGrid[row][nextColumn]);
-
-        if (previousColumn >= 0)
-            adjacentCells.add(mineSweeper.gameGrid[row][previousColumn]);
-
-        if (previousRow >= 0)
-            adjacentCells.add(mineSweeper.gameGrid[previousRow][column]);
-
-        if (nextRow < mineSweeper.totalRows)
-            adjacentCells.add(mineSweeper.gameGrid[nextRow][column]);
-
-        if (nextRow < mineSweeper.totalRows && nextColumn < mineSweeper.totalColumns)
-            adjacentCells.add(mineSweeper.gameGrid[nextRow][nextColumn]);
-
-        if (nextRow < mineSweeper.totalRows && previousColumn >= 0)
-            adjacentCells.add(mineSweeper.gameGrid[nextRow][previousColumn]);
-
-        if (previousRow >= 0 && nextColumn < mineSweeper.totalColumns)
-            adjacentCells.add(mineSweeper.gameGrid[previousRow][nextColumn]);
-
-        if (previousRow >= 0 && previousColumn >= 0)
-            adjacentCells.add(mineSweeper.gameGrid[previousRow][previousColumn]);
-
-        boolean hasAnyPendingMines = false;
-        for (var adjacentCell : adjacentCells) {
-
-            if (adjacentCell.isMined && !adjacentCell.isFlagged) {
-                hasAnyPendingMines = true;
-                break;
-            }
-        }
-
-        if (!hasAnyPendingMines) {
-
-            for (var adjacentCell : adjacentCells) {
-
-                if (adjacentCell.isMined)
-                    continue;
-
-                adjacentCell.isOpen = true;
-            }
-        }
-    }
-
-
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height);
-    }
-
     private void update(Rectangle mouseBounds) {
 
         for (int row = 0; row < mineSweeper.totalRows; row++) {
@@ -228,7 +171,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         clickSound.play();
 
                         if (actualCell.isOpen)
-                            checkAdjacentCellsToOpenByRowAndColumn(row, column);
+                            mineSweeper.checkAdjacentCellsToOpenByRowAndColumn(row, column);
 
                         if (actualCell.isFlagged) {
 
@@ -243,7 +186,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         if (!actualCell.isOpen) {
 
                             actualCell.isOpen = true;
-                            checkForCleanCells(actualCell, row, column);
+                            mineSweeper.checkForCleanCells(actualCell, row, column);
                         }
 
                         if (actualCell.isMined)
@@ -554,95 +497,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         mineSweeper.initializeGrid(mineSweeper.gameGrid);
     }
 
-    private void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
-
-        //I don't need to evaluate mine cells (9) and adjacent to mine cells, just the empty cells (0)
-        if (selectedCell.cellValue > 0)
-            return;
-
-        var result = floodFill(mineSweeper.gameGrid, selectedRow, selectedColumn);
-
-        for (int row = 0; row < mineSweeper.totalRows; row++) {
-
-            for (int column = 0; column < mineSweeper.totalColumns; column++) {
-
-                var actualCell = result[row][column];
-
-                if (actualCell.isMined || actualCell.isOpen)
-                    continue;
-
-                if (actualCell.cellValue == 10) {
-
-                    actualCell.isOpen = true;
-
-                    for (var adjacentIndex : mineSweeper.adjacentToMinesCellsIndexes) {
-
-                        var previousColumn = column - 1;
-                        var nextColumn = column + 1;
-
-                        var previousRow = row - 1;
-                        var nextRow = row + 1;
-
-                        if (nextColumn < mineSweeper.totalColumns && mineSweeper.gameGrid[row][nextColumn].index == adjacentIndex)
-                            mineSweeper.gameGrid[row][nextColumn].isOpen = true;
-
-                        if (previousColumn >= 0 && mineSweeper.gameGrid[row][previousColumn].index == adjacentIndex)
-                            mineSweeper.gameGrid[row][previousColumn].isOpen = true;
-
-                        if (previousRow >= 0 && mineSweeper.gameGrid[previousRow][column].index == adjacentIndex)
-                            mineSweeper.gameGrid[previousRow][column].isOpen = true;
-
-                        if (nextRow < mineSweeper.totalRows && nextColumn < mineSweeper.totalColumns && mineSweeper.gameGrid[nextRow][nextColumn].index == adjacentIndex)
-                            mineSweeper.gameGrid[nextRow][nextColumn].isOpen = true;
-
-                        if (nextRow < mineSweeper.totalRows && previousColumn >= 0 && mineSweeper.gameGrid[nextRow][previousColumn].index == adjacentIndex)
-                            mineSweeper.gameGrid[nextRow][previousColumn].isOpen = true;
-
-                        if (previousRow >= 0 && nextColumn < mineSweeper.totalColumns && mineSweeper.gameGrid[previousRow][nextColumn].index == adjacentIndex)
-                            mineSweeper.gameGrid[previousRow][nextColumn].isOpen = true;
-
-                        if (previousRow >= 0 && previousColumn >= 0 && mineSweeper.gameGrid[previousRow][previousColumn].index == adjacentIndex)
-                            mineSweeper.gameGrid[previousRow][previousColumn].isOpen = true;
-                    }
-                }
-            }
-        }
-    }
-
-    private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn) {
-
-        //default value to change my empty spaces.
-        final int newValue = 10;
-
-        // If the starting pixel already has the new color, no need
-        // to process
-        if (image[selectedRow][selectedColumn].cellValue == newValue)
-            return image;
-
-        // Call DFS with the original color of the starting pixel
-        depthFirstSearch(image, selectedRow, selectedColumn, image[selectedRow][selectedColumn].cellValue, newValue);
-
-        // Return the updated image
-        return image;
-    }
-
-    //    In Depth First Search (or DFS) for a graph, we traverse all adjacent vertices one by one.
-    private void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue) {
-
-        // Base case: check for out-of-bound indices or mismatched color
-        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue)
-            return; // Backtrack if invalid
-
-        // Change the color of the current pixel
-        image[x][y].cellValue = newValue;
-
-        // Recursively call DFS in all four directions
-        depthFirstSearch(image, x + 1, y, oldValue, newValue);
-        depthFirstSearch(image, x - 1, y, oldValue, newValue);
-        depthFirstSearch(image, x, y + 1, oldValue, newValue);
-        depthFirstSearch(image, x, y - 1, oldValue, newValue);
-    }
-
     @Override
     public void dispose() {
 
@@ -658,19 +512,16 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         tapSound.dispose();
         clickSound.dispose();
         boomSound.dispose();
-
         mineSweeper.dispose();
     }
 
     @Override
     public boolean keyDown(int keycode) {
-
         return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-
         return false;
     }
 
@@ -683,7 +534,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
         touchRelease = false;
-
         return false;
     }
 
@@ -691,7 +541,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 
         touchRelease = button == Input.Buttons.LEFT && shouldCheckForMines;
-
         return false;
     }
 

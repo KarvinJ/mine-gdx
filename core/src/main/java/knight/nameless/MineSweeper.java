@@ -209,6 +209,150 @@ public class MineSweeper {
         return minedCells;
     }
 
+    public void checkAdjacentCellsToOpenByRowAndColumn(int row, int column) {
+
+        var previousColumn = column - 1;
+        var nextColumn = column + 1;
+
+        var previousRow = row - 1;
+        var nextRow = row + 1;
+
+        var adjacentCells = new Array<Cell>();
+
+        if (nextColumn < totalColumns)
+            adjacentCells.add(gameGrid[row][nextColumn]);
+
+        if (previousColumn >= 0)
+            adjacentCells.add(gameGrid[row][previousColumn]);
+
+        if (previousRow >= 0)
+            adjacentCells.add(gameGrid[previousRow][column]);
+
+        if (nextRow < totalRows)
+            adjacentCells.add(gameGrid[nextRow][column]);
+
+        if (nextRow < totalRows && nextColumn < totalColumns)
+            adjacentCells.add(gameGrid[nextRow][nextColumn]);
+
+        if (nextRow < totalRows && previousColumn >= 0)
+            adjacentCells.add(gameGrid[nextRow][previousColumn]);
+
+        if (previousRow >= 0 && nextColumn < totalColumns)
+            adjacentCells.add(gameGrid[previousRow][nextColumn]);
+
+        if (previousRow >= 0 && previousColumn >= 0)
+            adjacentCells.add(gameGrid[previousRow][previousColumn]);
+
+        boolean hasAnyPendingMines = false;
+        for (var adjacentCell : adjacentCells) {
+
+            if (adjacentCell.isMined && !adjacentCell.isFlagged) {
+                hasAnyPendingMines = true;
+                break;
+            }
+        }
+
+        if (!hasAnyPendingMines) {
+
+            for (var adjacentCell : adjacentCells) {
+
+                if (adjacentCell.isMined)
+                    continue;
+
+                adjacentCell.isOpen = true;
+            }
+        }
+    }
+
+    public void checkForCleanCells(Cell selectedCell, int selectedRow, int selectedColumn) {
+
+        //I don't need to evaluate mine cells (9) and adjacent to mine cells, just the empty cells (0)
+        if (selectedCell.cellValue > 0)
+            return;
+
+        var result = floodFill(gameGrid, selectedRow, selectedColumn);
+
+        for (int row = 0; row < totalRows; row++) {
+
+            for (int column = 0; column < totalColumns; column++) {
+
+                var actualCell = result[row][column];
+
+                if (actualCell.isMined || actualCell.isOpen)
+                    continue;
+
+                if (actualCell.cellValue == 10) {
+
+                    actualCell.isOpen = true;
+
+                    for (var adjacentIndex : adjacentToMinesCellsIndexes) {
+
+                        var previousColumn = column - 1;
+                        var nextColumn = column + 1;
+
+                        var previousRow = row - 1;
+                        var nextRow = row + 1;
+
+                        if (nextColumn < totalColumns && gameGrid[row][nextColumn].index == adjacentIndex)
+                            gameGrid[row][nextColumn].isOpen = true;
+
+                        if (previousColumn >= 0 && gameGrid[row][previousColumn].index == adjacentIndex)
+                            gameGrid[row][previousColumn].isOpen = true;
+
+                        if (previousRow >= 0 && gameGrid[previousRow][column].index == adjacentIndex)
+                            gameGrid[previousRow][column].isOpen = true;
+
+                        if (nextRow < totalRows && nextColumn < totalColumns && gameGrid[nextRow][nextColumn].index == adjacentIndex)
+                            gameGrid[nextRow][nextColumn].isOpen = true;
+
+                        if (nextRow < totalRows && previousColumn >= 0 && gameGrid[nextRow][previousColumn].index == adjacentIndex)
+                            gameGrid[nextRow][previousColumn].isOpen = true;
+
+                        if (previousRow >= 0 && nextColumn < totalColumns && gameGrid[previousRow][nextColumn].index == adjacentIndex)
+                            gameGrid[previousRow][nextColumn].isOpen = true;
+
+                        if (previousRow >= 0 && previousColumn >= 0 && gameGrid[previousRow][previousColumn].index == adjacentIndex)
+                            gameGrid[previousRow][previousColumn].isOpen = true;
+                    }
+                }
+            }
+        }
+    }
+
+    private Cell[][] floodFill(Cell[][] image, int selectedRow, int selectedColumn) {
+
+        //default value to change my empty spaces.
+        final int newValue = 10;
+
+        // If the starting pixel already has the new color, no need
+        // to process
+        if (image[selectedRow][selectedColumn].cellValue == newValue)
+            return image;
+
+        // Call DFS with the original color of the starting pixel
+        depthFirstSearch(image, selectedRow, selectedColumn, image[selectedRow][selectedColumn].cellValue, newValue);
+
+        // Return the updated image
+        return image;
+    }
+
+    //    In Depth First Search (or DFS) for a graph, we traverse all adjacent vertices one by one.
+    private void depthFirstSearch(Cell[][] image, int x, int y, int oldValue, int newValue) {
+
+        // Base case: check for out-of-bound indices or mismatched color
+        if (x < 0 || x >= image.length || y < 0 || y >= image[0].length || image[x][y].cellValue != oldValue)
+            return; // Backtrack if invalid
+
+        // Change the color of the current pixel
+        image[x][y].cellValue = newValue;
+
+        // Recursively call DFS in all four directions
+        depthFirstSearch(image, x + 1, y, oldValue, newValue);
+        depthFirstSearch(image, x - 1, y, oldValue, newValue);
+        depthFirstSearch(image, x, y + 1, oldValue, newValue);
+        depthFirstSearch(image, x, y - 1, oldValue, newValue);
+    }
+
     public void dispose () {
 
         for (var tileNumberTexture : tileNumberTextures)

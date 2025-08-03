@@ -106,7 +106,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         int horizontalOffset = isHardMode ? 5 : 9;
         int cellSize = isHardMode ? 41 : 45;
-        int verticalOffset = isHardMode ? 0 : 210;
+        int verticalOffset = isHardMode ? 10 : 220;
         int cellOffset = 2;
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -454,8 +454,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         shapeRenderer.setColor(Color.DARK_GRAY);
 
-        var yValue = isHardMode ? 0 : 202;
-        var height = isHardMode ? 620 : 420;
+        var yValue = isHardMode ? 0 : 212;
+        var height = isHardMode ? 630 : 420;
         var backgroundBounds = new Rectangle(-2, yValue, SCREEN_WIDTH + 2, height);
 
         shapeRenderer.rect(

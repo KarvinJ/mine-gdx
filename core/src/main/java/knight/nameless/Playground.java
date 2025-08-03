@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -47,6 +48,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     private Texture smileyTexture;
     private Array<Texture> tileNumberTextures;
     private TextureRegion[] scoreNumbers;
+    private Sound boomSound;
+    private Sound clickSound;
+    private Sound tapSound;
     private boolean touchRelease = false;
     private boolean theGameHasBeenReset = false;
 
@@ -86,6 +90,10 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         }
 
         scoreNumbers = loadNumbersTextureRegion();
+
+        boomSound = Gdx.audio.newSound(Gdx.files.internal("sounds/boom.wav"));
+        clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/click.wav"));
+        tapSound = Gdx.audio.newSound(Gdx.files.internal("sounds/tap.wav"));
 
         Gdx.input.setInputProcessor(this);
     }
@@ -397,7 +405,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
                 if (mouseBounds.overlaps(actualCell.bounds)) {
 
-                    //need to do this to avoid the bug
+                    //need to do this to avoid the first click bug when resetting the game
                     if (theGameHasBeenReset) {
 
                         theGameHasBeenReset = false;
@@ -407,9 +415,14 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
                     if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (Gdx.input.justTouched() && !shouldCheckForMines))) {
 
+                        tapSound.play();
+
                         if (!actualCell.isOpen)
                             actualCell.isFlagged = !actualCell.isFlagged;
+
                     } else if (touchRelease) {
+
+                        clickSound.play();
 
                         if (actualCell.isOpen)
                             checkAdjacentCellsToOpenByRowAndColumn(row, column);
@@ -429,6 +442,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                             actualCell.isOpen = true;
                             checkForCleanCells(actualCell, row, column);
                         }
+
+                        if (actualCell.isMined)
+                            boomSound.play();
 
                         touchRelease = false;
                     }
@@ -562,12 +578,12 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         }
                     }
 
-                    renderGameOverFlags(flaggedCells, minedCells);
+                    renderGameOverTextures(flaggedCells, minedCells);
 
                     if (youWin)
                         font.draw(batch, "You Win", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
                     else
-                        font.draw(batch, "You Lost", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
+                        font.draw(batch, "You Lose", SCREEN_WIDTH / 2f - 30, SCREEN_HEIGHT - 4);
 
                 } else {
 
@@ -673,7 +689,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         );
     }
 
-    private void renderGameOverFlags(Array<Cell> flaggedCells, Array<Cell> minedCells) {
+    private void renderGameOverTextures(Array<Cell> flaggedCells, Array<Cell> minedCells) {
 
         for (var flaggedCell : flaggedCells) {
 
@@ -836,6 +852,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         emptyCellTexture.dispose();
         flagTexture.dispose();
         wrongFlagTexture.dispose();
+        tapSound.dispose();
+        clickSound.dispose();
+        boomSound.dispose();
 
         for (var tileNumberTexture : tileNumberTextures)
             tileNumberTexture.dispose();

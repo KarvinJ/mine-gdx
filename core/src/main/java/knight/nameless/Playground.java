@@ -23,7 +23,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 720;
     private int TOTAL_ROWS = 9;
-    private final int TOTAL_COLUMNS = 9;
+    private int TOTAL_COLUMNS = 9;
     private int TOTAL_MINES = 10;
     private float time = 0;
     private boolean isGameOver = false;
@@ -98,6 +98,33 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
             textureToSplit, textureToSplit.getWidth() / 10,
             textureToSplit.getHeight()
         )[0];
+    }
+
+    private void initializeGrid(Cell[][] grid) {
+
+        int index = 0;
+
+        int horizontalOffset = isHardMode ? 5 : 9;
+        int cellSize = isHardMode ? 41 : 45;
+        int verticalOffset = isHardMode ? 8 : 180;
+        int cellOffset = 2;
+
+        for (int row = 0; row < TOTAL_ROWS; row++) {
+
+            for (int column = 0; column < TOTAL_COLUMNS; column++) {
+
+                Rectangle actualCellBounds = new Rectangle(
+                    column * cellSize + horizontalOffset,
+                    row * cellSize + verticalOffset,
+                    cellSize - cellOffset,
+                    cellSize - cellOffset
+                );
+
+                grid[row][column] = new Cell(index, actualCellBounds);
+                grid[row][column].cellValue = 0;
+                index++;
+            }
+        }
     }
 
     private void drawNumbers(SpriteBatch batch, int number, float positionX) {
@@ -303,7 +330,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         }
     }
 
-
     private void setAdjacentToMinesCells() {
 
         for (int row = 0; row < TOTAL_ROWS; row++) {
@@ -353,33 +379,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                     actualCell.sprite = tileNumberTextures.get(mineCounter - 1);
                     adjacentToMinesCellsIndexes.add(actualCell.index);
                 }
-            }
-        }
-    }
-
-    private void initializeGrid(Cell[][] grid) {
-
-        int index = 0;
-
-        int horizontalOffset = 9;
-        int cellSize = 45;
-        int verticalOffset = isHardMode ? 2 : 180;
-        int cellOffset = 2;
-
-        for (int row = 0; row < TOTAL_ROWS; row++) {
-
-            for (int column = 0; column < TOTAL_COLUMNS; column++) {
-
-                Rectangle actualCellBounds = new Rectangle(
-                    column * cellSize + horizontalOffset,
-                    row * cellSize + verticalOffset,
-                    cellSize - cellOffset,
-                    cellSize - cellOffset
-                );
-
-                grid[row][column] = new Cell(index, actualCellBounds);
-                grid[row][column].cellValue = 0;
-                index++;
             }
         }
     }
@@ -724,11 +723,13 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         if (isHardMode) {
 
             TOTAL_MINES = 20;
-            TOTAL_ROWS = 13;
+            TOTAL_ROWS = 14;
+            TOTAL_COLUMNS = 10;
         } else {
 
             TOTAL_MINES = 10;
             TOTAL_ROWS = 9;
+            TOTAL_COLUMNS = 9;
         }
 
         gameGrid = new Cell[TOTAL_ROWS][TOTAL_COLUMNS];

@@ -1,5 +1,6 @@
 package knight.nameless;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -45,9 +46,13 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     private Sound tapSound;
     private boolean touchRelease = false;
     private boolean theGameHasBeenReset = false;
+    private boolean isAndroid = false;
 
     @Override
     public void create() {
+
+        if (Gdx.app.getType() == Application.ApplicationType.Android)
+            isAndroid = true;
 
         camera = new OrthographicCamera();
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
@@ -90,6 +95,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
             textureToSplit.getHeight()
         )[0];
     }
+
     private void drawNumbers(SpriteBatch batch, int number, float positionX) {
 
         final float width = 48;
@@ -380,7 +386,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
             resetGame();
         }
 
-        if (Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
+        if (isAndroid && Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
             shouldCheckForMines = !shouldCheckForMines;
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
@@ -406,25 +412,30 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
             );
         }
 
-        if (shouldCheckForMines) {
 
-            batch.draw(
-                mineTexture,
-                stateBounds.x,
-                stateBounds.y,
-                stateBounds.width,
-                stateBounds.height
-            );
-        } else {
+        if (isAndroid) {
 
-            batch.draw(
-                flagTexture,
-                stateBounds.x,
-                stateBounds.y,
-                stateBounds.width,
-                stateBounds.height
-            );
+            if (shouldCheckForMines) {
+
+                batch.draw(
+                    mineTexture,
+                    stateBounds.x,
+                    stateBounds.y,
+                    stateBounds.width,
+                    stateBounds.height
+                );
+            } else {
+
+                batch.draw(
+                    flagTexture,
+                    stateBounds.x,
+                    stateBounds.y,
+                    stateBounds.width,
+                    stateBounds.height
+                );
+            }
         }
+
 
         batch.draw(
             smileyTexture,
@@ -554,7 +565,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         return false;
     }
 
-    //this metho always have the mouse position
+    //this method always have the mouse position
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;

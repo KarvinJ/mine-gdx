@@ -116,14 +116,6 @@ public class Playground extends ApplicationAdapter {
                 batch.draw(scoreNumbers[number], positionX + spaceBetweenNumbers * 2, positionY, width, height);
             else
                 batch.draw(scoreNumbers[0], positionX + spaceBetweenNumbers * 2, positionY, width, height);
-        } else if (number < 100) {
-
-            int tens = number / 10;
-            int units = number % 10;
-
-            batch.draw(scoreNumbers[0], positionX, positionY, width, height);
-            batch.draw(scoreNumbers[tens], positionX + spaceBetweenNumbers, positionY, width, height);
-            batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 2, positionY, width, height);
         } else {
 
             int hundred = number / 100;
@@ -138,10 +130,10 @@ public class Playground extends ApplicationAdapter {
             } else {
 
                 int hundredTens = hundredUnits / 10;
-                int hundredUnits2 = hundredUnits % 10;
+                int units = hundredUnits % 10;
 
                 batch.draw(scoreNumbers[hundredTens], positionX + spaceBetweenNumbers, positionY, width, height);
-                batch.draw(scoreNumbers[hundredUnits2], positionX + spaceBetweenNumbers * 2, positionY, width, height);
+                batch.draw(scoreNumbers[units], positionX + spaceBetweenNumbers * 2, positionY, width, height);
             }
         }
     }

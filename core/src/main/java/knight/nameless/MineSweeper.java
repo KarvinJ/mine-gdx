@@ -28,6 +28,7 @@ public class MineSweeper {
 
             tileNumberTextures.add(new Texture("img/Tile" + i + ".png"));
         }
+
         adjacentToMinesCellsIndexes = new Array<>();
         mineCellsIndexes = new Array<>();
     }

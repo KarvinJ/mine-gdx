@@ -4,7 +4,6 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -19,14 +18,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-public class Playground extends ApplicationAdapter implements InputProcessor {
+public class Playground extends ApplicationAdapter {
 
     public final int SCREEN_WIDTH = 420;
     public final int SCREEN_HEIGHT = 720;
     private float time = 0;
     private boolean isGameOver = false;
     private boolean youWin = false;
-    private boolean shouldCheckForMines = true;
     private MineSweeper mineSweeper;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
@@ -44,9 +42,9 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
     private Sound boomSound;
     private Sound clickSound;
     private Sound tapSound;
-    private boolean touchRelease = false;
     private boolean theGameHasBeenReset = false;
     private boolean isAndroid = false;
+    private MyInputProcessor myInputProcessor;
 
     @Override
     public void create() {
@@ -78,7 +76,8 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/click.wav"));
         tapSound = Gdx.audio.newSound(Gdx.files.internal("sounds/tap.wav"));
 
-        Gdx.input.setInputProcessor(this);
+        myInputProcessor = new MyInputProcessor();
+        Gdx.input.setInputProcessor(myInputProcessor);
     }
 
     @Override
@@ -161,18 +160,18 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                     if (theGameHasBeenReset) {
 
                         theGameHasBeenReset = false;
-                        touchRelease = false;
+                        myInputProcessor.touchRelease = false;
                         return;
                     }
 
-                    if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (Gdx.input.justTouched() && !shouldCheckForMines))) {
+                    if ((Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || (Gdx.input.justTouched() && !myInputProcessor.shouldCheckForMines))) {
 
                         tapSound.play();
 
                         if (!actualCell.isOpen)
                             actualCell.isFlagged = !actualCell.isFlagged;
 
-                    } else if (touchRelease) {
+                    } else if (myInputProcessor.touchRelease) {
 
                         clickSound.play();
 
@@ -182,7 +181,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         if (actualCell.isFlagged) {
 
                             actualCell.isFlagged = false;
-                            touchRelease = false;
+                            myInputProcessor.touchRelease = false;
                             break;
                         }
 
@@ -198,7 +197,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                         if (actualCell.isMined)
                             boomSound.play();
 
-                        touchRelease = false;
+                        myInputProcessor.touchRelease = false;
                     }
                 }
             }
@@ -387,7 +386,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         }
 
         if (isAndroid && Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
-            shouldCheckForMines = !shouldCheckForMines;
+            myInputProcessor.shouldCheckForMines = !myInputProcessor.shouldCheckForMines;
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
             resetGame();
@@ -415,7 +414,7 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
 
         if (isAndroid) {
 
-            if (shouldCheckForMines) {
+            if (myInputProcessor.shouldCheckForMines) {
 
                 batch.draw(
                     mineTexture,
@@ -435,7 +434,6 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
                 );
             }
         }
-
 
         batch.draw(
             smileyTexture,
@@ -524,55 +522,5 @@ public class Playground extends ApplicationAdapter implements InputProcessor {
         clickSound.dispose();
         boomSound.dispose();
         mineSweeper.dispose();
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-
-        touchRelease = false;
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
-        touchRelease = button == Input.Buttons.LEFT && shouldCheckForMines;
-        return false;
-    }
-
-    @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    //this method always have the mouse position
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(float amountX, float amountY) {
-        return false;
     }
 }

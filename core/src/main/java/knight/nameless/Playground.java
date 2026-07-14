@@ -1,6 +1,5 @@
 package knight.nameless;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -43,14 +42,10 @@ public class Playground extends ApplicationAdapter {
     private Sound clickSound;
     private Sound tapSound;
     private boolean theGameHasBeenReset = false;
-    private boolean isAndroid = false;
     private MyInputProcessor myInputProcessor;
 
     @Override
     public void create() {
-
-        if (Gdx.app.getType() == Application.ApplicationType.Android)
-            isAndroid = true;
 
         camera = new OrthographicCamera();
         camera.position.set(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 0);
@@ -377,7 +372,7 @@ public class Playground extends ApplicationAdapter {
             resetGame();
         }
 
-        if (isAndroid && Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
+        if (Gdx.input.justTouched() && mouseBounds.overlaps(stateBounds))
             myInputProcessor.shouldCheckForMines = !myInputProcessor.shouldCheckForMines;
 
         if (Gdx.input.justTouched() && mouseBounds.overlaps(smileyBounds))
@@ -403,28 +398,24 @@ public class Playground extends ApplicationAdapter {
             );
         }
 
+        if (myInputProcessor.shouldCheckForMines) {
 
-        if (isAndroid) {
+            batch.draw(
+                mineTexture,
+                stateBounds.x,
+                stateBounds.y,
+                stateBounds.width,
+                stateBounds.height
+            );
+        } else {
 
-            if (myInputProcessor.shouldCheckForMines) {
-
-                batch.draw(
-                    mineTexture,
-                    stateBounds.x,
-                    stateBounds.y,
-                    stateBounds.width,
-                    stateBounds.height
-                );
-            } else {
-
-                batch.draw(
-                    flagTexture,
-                    stateBounds.x,
-                    stateBounds.y,
-                    stateBounds.width,
-                    stateBounds.height
-                );
-            }
+            batch.draw(
+                flagTexture,
+                stateBounds.x,
+                stateBounds.y,
+                stateBounds.width,
+                stateBounds.height
+            );
         }
 
         batch.draw(
